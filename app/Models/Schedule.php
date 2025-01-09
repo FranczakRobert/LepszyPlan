@@ -9,8 +9,10 @@ class Schedule extends Model
 {
     use hasFactory;
 
+    public $timestamps = false;
+
     protected $fillable = [
-        'name', 'form', 'from', 'to', 'groupId', 'teacherId',
+        'form', 'from', 'to', 'groupId', 'teacherId', 'roomId', 'subjectId'
     ];
 
     public function group()
@@ -28,4 +30,8 @@ class Schedule extends Model
         return $this->belongsTo(Room::class, 'roomId');
     }
 
+    public function subject()
+    {
+        return $this->belongsTo(Subject::class, 'subjectId');
+    }
 }
