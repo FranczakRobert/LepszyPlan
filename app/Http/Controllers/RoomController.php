@@ -18,7 +18,7 @@ class RoomController extends Controller
         $room = Room::where('item', $name)->get();
 
         if ($room->isEmpty()) {
-            return response()->json(['message' => 'No teachers found with this name'], 404);
+            return response()->json(['message' => 'No rooms found with this name'], 404);
         }
         return response()->json($room);
     }

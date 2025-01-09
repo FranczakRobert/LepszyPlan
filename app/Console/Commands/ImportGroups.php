@@ -43,9 +43,8 @@ class ImportGroups extends Command
                     if (isset($groupData['item'])) {
                         $groupName = $groupData['item'];
 
-                        // Utworzenie lub zaktualizowanie grupy w bazie danych
                         Group::updateOrCreate(
-                            ['name' => $groupName] // Zapytanie używające nazwy grupy jako klucza unikalnego
+                            ['name' => $groupName]
                         );
                     }
                 }
