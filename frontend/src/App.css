@@ -1,38 +1,141 @@
-.App {
-  text-align: center;
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+.header {
+    background-color: #0078d4;
+    color: white;
+    padding: 10px 20px;
+    text-align: center;
+    font-size: 24px;
+}
+.footer {
+    background-color: #f1f1f1;
+    text-align: center;
+    padding: 10px;
+    font-size: 14px;
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+}
+.container {
+    padding: 20px;
+}
+.filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+.filter-group {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    flex: 1 1 calc(33.333% - 10px);
+    min-width: 200px;
+}
+.filter-group label {
+    font-weight: bold;
+}
+.buttons {
+    margin-bottom: 20px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+.plan-view {
+    margin-bottom: 20px;
+}
+.plan-view header {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+    gap: 10px;
 }
 
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
+#date-range {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: center;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
+.statistics {
+    margin-top: 20px;
+}
+.statistics div {
+    margin: 5px 0;
+}
+button {
+    padding: 10px 15px;
+    background-color: #0078d4;
+    color: white;
+    border: none;
+    cursor: pointer;
+    border-radius: 5px;
+}
+button:hover {
+    background-color: #005fa3;
+}
+select, input {
+    padding: 5px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
 }
 
-.App-header {
-  background-color: #282c34;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
+/* Responsive Styles */
+@media (max-width: 1200px) {
+    .filter-group {
+        flex: 1 1 calc(50% - 10px);
+    }
 }
 
-.App-link {
-  color: #61dafb;
+@media (max-width: 768px) {
+    .header {
+        font-size: 20px;
+        padding: 10px;
+    }
+    .filter-group {
+        flex: 1 1 100%;
+    }
+    .buttons {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    .plan-view header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
 }
 
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+@media (max-width: 480px) {
+    .header {
+        font-size: 18px;
+        padding: 8px;
+    }
+    .container {
+        padding: 10px;
+    }
+    button {
+        padding: 8px 10px;
+        font-size: 14px;
+    }
+}
+
+.plan {
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    padding: 10px;
+    background-color: #f9f9f9;
+    margin-bottom: 10px;
+}
+.plan .time {
+    font-weight: bold;
+}
+.plan .details {
+    margin-top: 5px;
 }
