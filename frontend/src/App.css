@@ -1,3 +1,4 @@
+/* Global Styles */
 body {
     font-family: Arial, sans-serif;
     margin: 0;
@@ -7,9 +8,10 @@ body {
 .header {
     background-color: #0078d4;
     color: white;
-    padding: 10px 20px;
+    padding: 15px 20px;
     text-align: center;
-    font-size: 24px;
+    font-size: 26px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
 .footer {
     background-color: #f1f1f1;
@@ -19,6 +21,7 @@ body {
     position: fixed;
     bottom: 0;
     width: 100%;
+    border-top: 1px solid #ccc;
 }
 .container {
     padding: 20px;
@@ -26,18 +29,24 @@ body {
 .filters {
     display: flex;
     flex-wrap: wrap;
-    gap: 10px;
+    gap: 15px;
     margin-bottom: 20px;
 }
 .filter-group {
     display: flex;
     flex-direction: column;
     gap: 5px;
-    flex: 1 1 calc(33.333% - 10px);
+    flex: 1 1 calc(33.333% - 15px);
     min-width: 200px;
+    padding: 10px;
+    border: 1px solid #eaeaea;
+    border-radius: 8px;
+    background-color: #fdfdfd;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 .filter-group label {
     font-weight: bold;
+    font-size: 14px;
 }
 .buttons {
     margin-bottom: 20px;
@@ -56,16 +65,18 @@ body {
     margin-bottom: 10px;
     gap: 10px;
 }
-
 #date-range {
     display: flex;
     flex-wrap: wrap;
     gap: 10px;
     align-items: center;
 }
-
 .statistics {
     margin-top: 20px;
+    padding: 10px;
+    background-color: #fdfdfd;
+    border: 1px solid #eaeaea;
+    border-radius: 8px;
 }
 .statistics div {
     margin: 5px 0;
@@ -77,23 +88,66 @@ button {
     border: none;
     cursor: pointer;
     border-radius: 5px;
+    font-size: 14px;
+    text-align: center;
+    min-width: 120px;
+    max-height: 40px; /* Ograniczenie wysokości */
+    line-height: 1.2; /* Kontrola odstępu między wierszami */
+    transition: background-color 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden; /* Zapobiega wyświetlaniu tekstu poza przyciskiem */
+    text-overflow: ellipsis; /* Skraca długi tekst */
+    white-space: nowrap; /* Zapobiega zawijaniu tekstu */
 }
 button:hover {
     background-color: #005fa3;
 }
+button.small {
+    padding: 5px 10px;
+    font-size: 12px;
+    min-width: auto;
+    background-color: #f44336;
+}
+button.small:hover {
+    background-color: #d32f2f;
+}
+button.small .icon {
+    margin-right: 5px;
+}
 select, input {
-    padding: 5px;
+    padding: 8px;
     border: 1px solid #ccc;
     border-radius: 5px;
+    font-size: 14px;
+    width: 200px;
+}
+/* Plan View Styles */
+.plan {
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    padding: 15px;
+    background-color: #ffffff;
+    margin-bottom: 10px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+.plan .time {
+    font-weight: bold;
+    color: #0078d4;
+}
+.plan .details {
+    margin-top: 5px;
+    font-size: 14px;
+    color: #333;
 }
 
 /* Responsive Styles */
 @media (max-width: 1200px) {
     .filter-group {
-        flex: 1 1 calc(50% - 10px);
+        flex: 1 1 calc(50% - 15px);
     }
 }
-
 @media (max-width: 768px) {
     .header {
         font-size: 20px;
@@ -111,7 +165,6 @@ select, input {
         align-items: flex-start;
     }
 }
-
 @media (max-width: 480px) {
     .header {
         font-size: 18px;
@@ -124,18 +177,4 @@ select, input {
         padding: 8px 10px;
         font-size: 14px;
     }
-}
-
-.plan {
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    padding: 10px;
-    background-color: #f9f9f9;
-    margin-bottom: 10px;
-}
-.plan .time {
-    font-weight: bold;
-}
-.plan .details {
-    margin-top: 5px;
 }
