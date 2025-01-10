@@ -335,7 +335,6 @@ function PlanView({ viewType, setViewType, activeFilters }) {
                                 <div key={index} className="day-header day-column">{day}</div>
                             ))}
                     </div>
-
                         {getMonthlySchedule().map((week, i) => (
                             <div key={i} className="week-row">
                                 {week.map((day, j) => (
