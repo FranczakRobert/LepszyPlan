@@ -12,7 +12,8 @@ function sendRequestToAPI(filters, dateRange) {
         from: dateRange.from || null,
         to: dateRange.to || null,
     };
-    fetch("http://localhost:8000/plan", {
+
+    return fetch("http://localhost:8000/plan", {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
@@ -25,15 +26,12 @@ function sendRequestToAPI(filters, dateRange) {
             }
             return response.json();
         })
-        .then((data) => {
-            console.log("Otrzymane dane z API:", data);
-            alert("Dane zostały pomyślnie pobrane!");
-        })
         .catch((error) => {
             console.error("Błąd podczas wysyłania żądania do API:", error);
             alert("Wystąpił błąd podczas komunikacji z API.");
         });
 }
+
 
 
 function App() {
@@ -55,6 +53,7 @@ function App() {
         from: "",
         to: "",
     });
+    const [planData, setPlanData] = useState(null);
 
     const showPlan = () => {
         if (!dateRange.from || !dateRange.to) {
@@ -62,7 +61,13 @@ function App() {
             return;
         }
         setActiveFilters(filters);
-        sendRequestToAPI(filters, dateRange);
+
+        sendRequestToAPI(filters, dateRange).then((data) => {
+                setPlanData(data); // Set the plan data state
+            })
+            .catch((error) => {
+                console.error("Error fetching data:", error);
+            });
     };
 
     const setFiltersFromUrl = () => {
@@ -110,7 +115,7 @@ function App() {
                 >
                     Pokaż plan
                 </button>
-                <PlanView viewType={viewType} setViewType={setViewType} activeFilters={activeFilters} />
+                <PlanView viewType={viewType} setViewType={setViewType} dateRange={dateRange} planData={planData}/>
                 <Statistics />
             </div>
 
@@ -120,84 +125,6 @@ function App() {
 }
 
 
-
-// function App() {
-//     const [activeFilters, setActiveFilters] = useState({});
-//     const [viewType, setViewType] = useState("Dzienny");
-//     const [filters, setFilters] = useState({
-//         studenci: [],
-//         wykladowcy: [],
-//         grupy: [],
-//         kierunki: [],
-//         przedmioty: [],
-//         typStudiow: "",
-//         rokStudiow: "",
-//         wydzialy: "",
-//         budynki: "",
-//         sale: [],
-//     });
-//     const [dateRange, setDateRange] = useState({
-//         from: "",
-//         to: "",
-//     });
-//
-//     const showPlan = () => {
-//         if (!dateRange.from || !dateRange.to) {
-//             alert("Proszę wybrać pełny zakres dat.");
-//             return;
-//         }
-//         setActiveFilters(filters); // Ustawia aktywne filtry na te aktualnie wybrane
-//         sendRequestToAPI(filters, dateRange); // Wysyła żądanie do API
-//     };
-//
-//     const setFiltersFromUrl = () => {
-//         const queryParams = new URLSearchParams(window.location.search);
-//         const newFilters = {};
-//
-//         queryParams.forEach((value, key) => {
-//             if (newFilters[key]) {
-//                 // Jeśli filtr jest tablicą, dodaj wartość do istniejącej tablicy
-//                 if (Array.isArray(newFilters[key])) {
-//                     newFilters[key].push(value);
-//                 } else {
-//                     // Przekształć w tablicę
-//                     newFilters[key] = [newFilters[key], value];
-//                 }
-//             } else {
-//                 // Ustaw wartość bezpośrednio
-//                 newFilters[key] = value;
-//             }
-//         });
-//
-//         // Ustaw odczytane filtry w stanie
-//         setFilters((prevFilters) => ({
-//             ...prevFilters,
-//             ...newFilters,
-//         }));
-//         console.log("UWAGA: ",filters);
-//     };
-//
-//     useEffect(() => {
-//         setFiltersFromUrl();
-//     }, []);
-//
-//     return (
-//         <div className="App">
-//             <header className="header">Lepszy Plan</header>
-//
-//             <div className="container">
-//                 <Filters filters={filters} setFilters={setFilters} dataRange={dateRange} setDateRange={setDateRange}/>
-//                 <button onClick={showPlan} className={activeFilters === filters ? "show-schedule active" : "show-schedule"}>
-//                     Pokaż plan
-//                 </button>
-//                 <PlanView viewType={viewType} setViewType={setViewType} activeFilters={activeFilters}/>
-//                 <Statistics/>
-//             </div>
-//
-//             <footer className="footer">Strona stworzona przez projekt-syzyfy</footer>
-//         </div>
-//     );
-// }
 
 function Filters({filters, setFilters, dateRange, setDateRange }) {
     const [newTeacher, setNewTeacher] = useState("");
@@ -245,12 +172,6 @@ function Filters({filters, setFilters, dateRange, setDateRange }) {
 
     const addRoom = () => addItemToList("sale", newRoom);
     const removeRoom = (room) => removeItemFromList("sale", room);
-    const handleFilterChange = (filterName, value) => {
-        setFilters((prevFilters) => ({
-            ...prevFilters,
-            [filterName]: value,
-        }));
-    };
     const handleSaveFilters = () => {
         try {
             console.log("Filtry przed serializacją:", filters); // Dodaj logowanie
@@ -408,14 +329,14 @@ function Filters({filters, setFilters, dateRange, setDateRange }) {
 
 }
 
-function PlanView({viewType, setViewType, activeFilters}) {
+function PlanView({viewType, setViewType,dateRange,planData}) {
     const [startDate, setStartDate] = useState("");
     const [endDate, setEndDate] = useState("");
 
-    // Przykładowe dane
     const exampleSchedule = [
-        {time: "08:00 - 09:30", day: "Poniedziałek", subject: "Algorytmy", lecturer: "dr Kowalski", room: "Sala 101"},
-        {time: "10:00 - 11:30", day: "Wtorek", subject: "Bazy danych", lecturer: "prof. Nowak", room: "Sala 202"},
+        { time: "08:00 - 09:30", day: "Poniedziałek", subject: "Algorytmy", lecturer: "dr Kowalski", room: "Sala 101", date: "2025-01-01" },
+        { time: "10:00 - 11:30", day: "Wtorek", subject: "Bazy danych", lecturer: "prof. Nowak", room: "Sala 202", date: "2025-01-02" },
+        { time: "12:00 - 13:30", day: "Środa", subject: "Programowanie", lecturer: "mgr Nowak", room: "Sala 303", date: "2025-01-03" },
         // więcej danych...
     ];
 
@@ -437,6 +358,7 @@ function PlanView({viewType, setViewType, activeFilters}) {
     };
 
     return (
+
         <div className="plan-view">
             <header>
                 <div>
@@ -448,13 +370,25 @@ function PlanView({viewType, setViewType, activeFilters}) {
                     </select>
                 </div>
             </header>
+            <div></div>
+            {/*<div>*/}
+            {/*    <h2>Plan Zajęć</h2>*/}
+            {/*    /!* Render the plan data here *!/*/}
+            {/*    {planData ? (*/}
+            {/*        <div>{JSON.stringify(planData)}</div> // Example of rendering data; replace with your own rendering logic*/}
+            {/*    ) : (*/}
+            {/*        <p>Proszę wprowadzić filtry i wybrać daty, aby wyświetlić plan.</p>*/}
+            {/*    )}*/}
+            {/*</div>*/}
             <div id="schedule">
                 {viewType === "Dzienny" && (
                     <div>
                         <h3>Plan dzienny</h3>
-                        {exampleSchedule.map((entry, index) => (
+                        {exampleSchedule.filter(entry =>
+                            new Date(entry.date) >= new Date(dateRange.startDate) &&
+                            new Date(entry.date) <= new Date(dateRange.endDate)).map((entry, index) => (
                             <div key={index} className="plan">
-                                <div className="time">{entry.time}</div>
+                                <div className="time">{dateRange.startDate}</div>
                                 <div className="details">
                                     <div>Przedmiot: {entry.subject}</div>
                                     <div>Wykładowca: {entry.lecturer}</div>
@@ -469,39 +403,30 @@ function PlanView({viewType, setViewType, activeFilters}) {
                         {getWeeklySchedule().map((day, index) => (
                             <div key={index} className="day-column">
                                 <h4>{day.day}</h4>
-                                {day.schedule.map((entry, i) => (
+                                {planData.map((entry, i) => (
                                     <div key={i} className="plan">
-                                        <div className="time">{entry.time}</div>
-                                        <div>{entry.subject}</div>
-                                        <div>{entry.room}</div>
+                                        <div className="time">
+                                            {/* Format the time range for display */}
+                                            {new Date(entry.from).toLocaleString()} - {new Date(entry.to).toLocaleString()}
+                                        </div>
+                                        <div className="subject">{entry.subjectName}</div>
+                                        <div className="teacher">{entry.teacher}</div>
+                                        <div className="room">{entry.roomName}</div>
                                     </div>
                                 ))}
+
                             </div>
                         ))}
                     </div>
                 )}
                 {viewType === "Miesięczny" && (
-                    // <div className="month-grid">
-                    //     {getMonthlySchedule().map((week, i) => (
-                    //         <div key={i} className="week-row">
-                    //             {week.map((day, j) => (
-                    //                 <div
-                    //                     key={j}
-                    //                     className={classNames("day-cell", {empty: !day})}
-                    //                 >
-                    //                     {day ? <span>{day}</span> : ""}
-                    //                 </div>
-                    //             ))}
-                    //         </div>
-                    //     ))}
-                    // </div>
                     <div className="month-grid">
                         {/* Nagłówek z dniami tygodnia */}
                         <div className="week-header">
                             {["Poniedziałek", "Wtorek", "Środa", "Czwartek", "Piątek", "Sobota", "Niedziela"].map((day, index) => (
                                 <div key={index} className="day-header day-column">{day}</div>
                             ))}
-                    </div>
+                        </div>
                         {getMonthlySchedule().map((week, i) => (
                             <div key={i} className="week-row">
                                 {week.map((day, j) => (
