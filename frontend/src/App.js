@@ -49,7 +49,7 @@ function App() {
         rokStudiow: "",
         wydzialy: "",
         budynki: "",
-        sale: "",
+        sale: [],
     });
     const [dateRange, setDateRange] = useState({
         from: "",
@@ -60,7 +60,6 @@ function App() {
         setActiveFilters(filters); // Ustawia aktywne filtry na te aktualnie wybrane
         sendRequestToAPI(filters, dateRange); // Wysyła żądanie do API
     };
-
 
     const setFiltersFromUrl = () => {
         const queryParams = new URLSearchParams(window.location.search);
@@ -112,28 +111,44 @@ function App() {
 }
 
 function Filters({filters, setFilters }) {
-    const [newAlbumNumber, setNewAlbumNumber] = useState("");
+    const [newTeacher, setNewTeacher] = useState("");
+    const [newDirection, setNewDirection] = useState("");
+    const [newSubject, setNewSubject] = useState("");
+    const [newRoom, setNewRoom] = useState("");
 
-    // Dodawanie numeru albumu do listy
-    const addAlbumNumber = () => {
-        if (newAlbumNumber.trim() === "") {
-            alert("Numer albumu nie może być pusty.");
+    // Uniwersalna funkcja dodawania
+    const addItemToList = (key, value) => {
+        if (value.trim() === "") {
+            alert(`${key} nie może być puste.`);
             return;
         }
         setFilters((prevFilters) => ({
             ...prevFilters,
-            studenci: [...prevFilters.studenci, newAlbumNumber],
+            [key]: [...prevFilters[key], value],
         }));
-        setNewAlbumNumber(""); // Wyczyść pole tekstowe
     };
 
-    // Usuwanie numeru albumu z listy
-    const removeAlbumNumber = (albumNumber) => {
+    // Uniwersalna funkcja usuwania
+    const removeItemFromList = (key, value) => {
         setFilters((prevFilters) => ({
             ...prevFilters,
-            studenci: prevFilters.studenci.filter((num) => num !== albumNumber),
+            [key]: prevFilters[key].filter((item) => item !== value),
         }));
     };
+
+    // Specjalistyczne funkcje dla każdej grupy
+    const addTeacher = () => addItemToList("wykladowcy", newTeacher);
+    const removeTeacher = (teacher) => removeItemFromList("wykladowcy", teacher);
+
+    const addDirection = () => addItemToList("kierunki", newDirection);
+    const removeDirection = (direction) =>
+        removeItemFromList("kierunki", direction);
+
+    const addSubject = () => addItemToList("przedmioty", newSubject);
+    const removeSubject = (subject) => removeItemFromList("przedmioty", subject);
+
+    const addRoom = () => addItemToList("sale", newRoom);
+    const removeRoom = (room) => removeItemFromList("sale", room);
     const handleFilterChange = (filterName, value) => {
         setFilters((prevFilters) => ({
             ...prevFilters,
@@ -178,60 +193,89 @@ function Filters({filters, setFilters }) {
 
     return (
         <div className="filters">
-            {["wykladowcy", "grupy", "kierunki", "przedmioty"].map((filter) => (
-                <div className="filter-group" key={filter}>
-                    <label>{filter}</label>
-                    <select
-                        multiple
-                        value={filters[filter]}
-                        onChange={(e) =>
-                            handleFilterChange(
-                                filter,
-                                Array.from(e.target.selectedOptions, (option) => option.value)
-                            )
-                        }
-                    >
-                        <option value={`${filter} 1`}>{`${filter} 1`}</option>
-                        <option value={`${filter} 2`}>{`${filter} 2`}</option>
-                    </select>
-                </div>
-            ))}
-            {["typStudiow", "rokStudiow", "wydzialy", "budynki", "sale"].map((filter) => (
-                <div className="filter-group" key={filter}>
-                    <label>{filter}</label>
-                    <select
-                        value={filters[filter]}
-                        onChange={(e) => handleFilterChange(filter, e.target.value)}
-                    >
-                        <option value="">{`Wybierz ${filter}`}</option>
-                        <option value={`${filter} 1`}>{`${filter} 1`}</option>
-                        <option value={`${filter} 2`}>{`${filter} 2`}</option>
-                    </select>
-                </div>
-            ))}
-            {/* Specjalna sekcja dla studentów */}
+
+
+            {/* Wykładowcy */}
             <div className="filter-group">
-                <label>Studenci (Numery albumów)</label>
-                <div className="student-albums">
-                    <input
-                        type="text"
-                        value={newAlbumNumber}
-                        placeholder="Wpisz numer albumu"
-                        onChange={(e) => setNewAlbumNumber(e.target.value)}
-                    />
-                    <button onClick={addAlbumNumber}>Dodaj</button>
-                </div>
+                <h2>Wykładowcy</h2>
+                <input
+                    type="text"
+                    value={newTeacher}
+                    placeholder="Wpisz nazwisko wykładowcy"
+                    onChange={(e) => setNewTeacher(e.target.value)}
+                />
+                <button onClick={addTeacher}>Dodaj</button>
                 <ul>
-                    {filters.studenci.map((albumNumber, index) => (
+                    {filters.wykladowcy.map((teacher, index) => (
                         <li key={index}>
-                            {albumNumber}{" "}
-                            <button className="small" onClick={() => removeAlbumNumber(albumNumber)}>
-                                <i className="fas fa-trash icon"></i>
-                            </button>
+                            {teacher}{" "}
+                            <button className="button-small" onClick={() => removeTeacher(teacher)}><i className="fas fa-trash"></i></button>
                         </li>
                     ))}
                 </ul>
             </div>
+
+            {/* Kierunki */}
+            <div className="filter-group">
+                <h2>Kierunki</h2>
+                <input
+                    type="text"
+                    value={newDirection}
+                    placeholder="Wpisz nazwę kierunku"
+                    onChange={(e) => setNewDirection(e.target.value)}
+                />
+                <button onClick={addDirection}>Dodaj</button>
+                <ul>
+                    {filters.kierunki.map((direction, index) => (
+                        <li key={index}>
+                            {direction}{" "}
+                            <button className="button-small" onClick={() => removeDirection(direction)}><i className="fas fa-trash"></i></button>
+                        </li>
+                    ))}
+                </ul>
+            </div>
+
+            {/* Przedmioty */}
+            <div className="filter-group">
+                <h2>Przedmioty</h2>
+                <input
+                    type="text"
+                    value={newSubject}
+                    placeholder="Wpisz nazwę przedmiotu"
+                    onChange={(e) => setNewSubject(e.target.value)}
+                />
+                <button onClick={addSubject}>Dodaj</button>
+                <ul>
+                    {filters.przedmioty.map((subject, index) => (
+                        <li key={index}>
+                            {subject}{" "}
+                            <button className="button-small" onClick={() => removeSubject(subject)}><i className="fas fa-trash"></i></button>
+                        </li>
+                    ))}
+                </ul>
+            </div>
+
+            {/* Sale */}
+            <div className="filter-group">
+                <h2>Sale</h2>
+                <input
+                    type="text"
+                    value={newRoom}
+                    placeholder="Wpisz numer sali"
+                    onChange={(e) => setNewRoom(e.target.value)}
+                />
+                <button onClick={addRoom}>Dodaj</button>
+                <ul>
+                    {filters.sale.map((room, index) => (
+                        <li key={index}>
+                            {room}{" "}
+                            <button className="button-small" onClick={() => removeRoom(room)}><i className="fas fa-trash"></i></button>
+                        </li>
+                    ))}
+                </ul>
+            </div>
+
+
             <div className="buttons">
                 <button onClick={handleSaveFilters}>Zapisz filtry do ulubionych</button>
                 <button onClick={handleCopyToClipboard}>Kopiuj do schowka</button>
@@ -241,14 +285,14 @@ function Filters({filters, setFilters }) {
 
 }
 
-function PlanView({ viewType, setViewType, activeFilters }) {
+function PlanView({viewType, setViewType, activeFilters}) {
     const [startDate, setStartDate] = useState("");
     const [endDate, setEndDate] = useState("");
 
     // Przykładowe dane
     const exampleSchedule = [
-        { time: "08:00 - 09:30", day: "Poniedziałek", subject: "Algorytmy", lecturer: "dr Kowalski", room: "Sala 101" },
-        { time: "10:00 - 11:30", day: "Wtorek", subject: "Bazy danych", lecturer: "prof. Nowak", room: "Sala 202" },
+        {time: "08:00 - 09:30", day: "Poniedziałek", subject: "Algorytmy", lecturer: "dr Kowalski", room: "Sala 101"},
+        {time: "10:00 - 11:30", day: "Wtorek", subject: "Bazy danych", lecturer: "prof. Nowak", room: "Sala 202"},
         // więcej danych...
     ];
 
