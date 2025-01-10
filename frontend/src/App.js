@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import classNames from "classnames";
 import "./App.css";
 
 function sendRequestToAPI(filters, dateRange) {
@@ -317,19 +318,22 @@ function PlanView({ viewType, setViewType, activeFilters }) {
                         {getMonthlySchedule().map((week, i) => (
                             <div key={i} className="week-row">
                                 {week.map((day, j) => (
-                                    <div key={j} className="day-cell">
+                                    <div
+                                        key={j}
+                                        className={classNames("day-cell", {empty: !day})}
+                                    >
                                         {day ? <span>{day}</span> : ""}
                                     </div>
                                 ))}
                             </div>
                         ))}
                     </div>
+
                 )}
             </div>
         </div>
     );
 }
-
 
 
 function Statistics() {
