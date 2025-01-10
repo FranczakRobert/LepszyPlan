@@ -1,0 +1,290 @@
+/* Global Styles */
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+.header {
+    background-color: #0078d4;
+    color: white;
+    padding: 15px 20px;
+    text-align: center;
+    font-size: 26px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+.footer {
+    background-color: #f1f1f1;
+    text-align: center;
+    padding: 10px;
+    font-size: 14px;
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    border-top: 1px solid #ccc;
+}
+.container {
+    padding: 20px;
+}
+.filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    margin-bottom: 20px;
+}
+.filter-group {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    flex: 1 1 calc(33.333% - 15px);
+    min-width: 200px;
+    padding: 10px;
+    border: 1px solid #eaeaea;
+    border-radius: 8px;
+    background-color: #fdfdfd;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+.filter-group label {
+    font-weight: bold;
+    font-size: 14px;
+}
+.buttons {
+    margin-bottom: 20px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.show-schedule {
+    margin-bottom: 20px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.plan-view {
+    margin-bottom: 20px;
+}
+.plan-view header {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+    gap: 10px;
+}
+#date-range {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: center;
+}
+.statistics {
+    margin-top: 20px;
+    padding: 10px;
+    background-color: #fdfdfd;
+    border: 1px solid #eaeaea;
+    border-radius: 8px;
+}
+.statistics div {
+    margin: 5px 0;
+}
+button {
+    padding: 10px 15px;
+    background-color: #0078d4;
+    color: white;
+    border: none;
+    cursor: pointer;
+    border-radius: 5px;
+    font-size: 14px;
+    text-align: center;
+    min-width: 120px;
+    max-height: 40px; /* Ograniczenie wysokości */
+    line-height: 1.2; /* Kontrola odstępu między wierszami */
+    transition: background-color 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden; /* Zapobiega wyświetlaniu tekstu poza przyciskiem */
+    text-overflow: ellipsis; /* Skraca długi tekst */
+    white-space: nowrap; /* Zapobiega zawijaniu tekstu */
+}
+button:hover {
+    background-color: #005fa3;
+}
+button.small {
+    margin-left: auto;
+    padding: 5px 10px;
+    font-size: 12px;
+    min-width: auto;
+    background-color: #f44336;
+}
+button.small:hover {
+    background-color: #d32f2f;
+}
+button.small .icon {
+    margin-right: 5px;
+}
+
+ul {
+    max-height: 120px;
+    width: 200px;
+    overflow-y: scroll;
+}
+
+li {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 5px 10px;
+    border-bottom: 1px solid #eaeaea;
+}
+
+select, input {
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 14px;
+    width: 200px;
+}
+/* Plan View Styles */
+.plan {
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    padding: 15px;
+    background-color: #ffffff;
+    margin-bottom: 10px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+.plan .time {
+    font-weight: bold;
+    color: #0078d4;
+}
+.plan .details {
+    margin-top: 5px;
+    font-size: 14px;
+    color: #333;
+}
+
+/* Responsive Styles */
+@media (max-width: 1200px) {
+    .filter-group {
+        flex: 1 1 calc(50% - 15px);
+    }
+}
+@media (max-width: 768px) {
+    .header {
+        font-size: 20px;
+        padding: 10px;
+    }
+    .filter-group {
+        flex: 1 1 100%;
+    }
+    .buttons {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    .plan-view header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+}
+@media (max-width: 480px) {
+    .header {
+        font-size: 18px;
+        padding: 8px;
+    }
+    .container {
+        padding: 10px;
+    }
+    button {
+        padding: 8px 10px;
+        font-size: 14px;
+    }
+}
+
+#schedule {
+    margin-top: 20px;
+}
+
+.week-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 10px;
+}
+
+.week-header {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 5px;
+    width: 100%;
+    margin-bottom: 10px;
+    background-color: #eee;
+    text-align: center;
+    min-height: 40px;
+    min-width: 40px;
+}
+
+.day-column {
+    border: 1px solid #ccc;
+    padding: 10px;
+}
+
+.day-header {
+    display: grid;
+    border: 1px solid #eaeaea;
+    border-radius: 5px;
+    padding: 10px;
+    margin-bottom: 5px;
+    background-color: #ffffff;
+    text-align: center;
+    font-weight: bold;
+    min-height: 40px;
+    min-width: 40px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    flex-direction: column;
+}
+
+.week-row {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr); /* 7 kolumn: każdy dzień tygodnia */
+    gap: 5px; /* Odstępy między dniami */
+    width: 100%; /* Zapewnia pełną szerokość */
+    margin-bottom: 10px; /* Odstęp między wierszami tygodni */
+}
+
+.day-cell {
+    border: 1px solid #eaeaea;
+    border-radius: 5px;
+    padding: 10px;
+    background-color: #ffffff;
+    text-align: center;
+    min-height: 80px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+}
+
+.day-cell span {
+    font-weight: bold;
+    font-size: 14px;
+    color: #333;
+    margin-bottom: 5px;
+}
+
+.empty {
+    display: none;
+}
+
+.day-cell:hover {
+    background-color: #f5f5f5;
+    cursor: pointer;
+}
+
+/* Kontener miesiąca */
+.month-grid {
+    display: flex;
+    flex-direction: column; /* Ustaw wiersze tygodni jeden pod drugim */
+    width: 100%; /* Cała szerokość kontenera */
+}
+
