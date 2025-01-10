@@ -105,6 +105,7 @@ button:hover {
     background-color: #005fa3;
 }
 button.small {
+    margin-left: auto;
     padding: 5px 10px;
     font-size: 12px;
     min-width: auto;
@@ -116,6 +117,21 @@ button.small:hover {
 button.small .icon {
     margin-right: 5px;
 }
+
+ul {
+    max-height: 120px;
+    width: 200px;
+    overflow-y: scroll;
+}
+
+li {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 5px 10px;
+    border-bottom: 1px solid #eaeaea;
+}
+
 select, input {
     padding: 8px;
     border: 1px solid #ccc;
@@ -178,3 +194,59 @@ select, input {
         font-size: 14px;
     }
 }
+
+#schedule {
+    margin-top: 20px;
+}
+
+.week-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 10px;
+}
+
+.day-column {
+    border: 1px solid #ccc;
+    padding: 10px;
+}
+
+.week-row {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr); /* 7 kolumn: każdy dzień tygodnia */
+    gap: 5px; /* Odstępy między dniami */
+    width: 100%; /* Zapewnia pełną szerokość */
+    margin-bottom: 10px; /* Odstęp między wierszami tygodni */
+}
+
+.day-cell {
+    border: 1px solid #eaeaea;
+    border-radius: 5px;
+    padding: 10px;
+    background-color: #ffffff;
+    text-align: center;
+    min-height: 80px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+}
+
+.day-cell span {
+    font-weight: bold;
+    font-size: 14px;
+    color: #333;
+    margin-bottom: 5px;
+}
+
+.day-cell:hover {
+    background-color: #f5f5f5;
+    cursor: pointer;
+}
+
+/* Kontener miesiąca */
+.month-grid {
+    display: flex;
+    flex-direction: column; /* Ustaw wiersze tygodni jeden pod drugim */
+    width: 100%; /* Cała szerokość kontenera */
+}
+

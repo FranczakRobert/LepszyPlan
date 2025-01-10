@@ -11,7 +11,6 @@ function sendRequestToAPI(filters, dateRange) {
         from: dateRange.from || null,
         to: dateRange.to || null,
     };
-
     fetch("http://localhost:8000/plan", {
         method: "POST",
         headers: {
@@ -37,6 +36,7 @@ function sendRequestToAPI(filters, dateRange) {
 
 
 function App() {
+    const [activeFilters, setActiveFilters] = useState({});
     const [viewType, setViewType] = useState("Dzienny");
     const [filters, setFilters] = useState({
         studenci: [],
@@ -54,6 +54,12 @@ function App() {
         from: "",
         to: "",
     });
+
+    const showPlan = () => {
+        setActiveFilters(filters); // Ustawia aktywne filtry na te aktualnie wybrane
+        sendRequestToAPI(filters, dateRange); // Wysyła żądanie do API
+    };
+
 
     const setFiltersFromUrl = () => {
         const queryParams = new URLSearchParams(window.location.search);
@@ -92,10 +98,10 @@ function App() {
 
             <div className="container">
                 <Filters filters={filters} setFilters={setFilters}/>
-                <button onClick={() => sendRequestToAPI(filters, dateRange)}>
+                <button onClick={showPlan} className={activeFilters === filters ? "active" : ""}>
                     Pokaż plan
                 </button>
-                <PlanView viewType={viewType} setViewType={setViewType}/>
+                <PlanView viewType={viewType} setViewType={setViewType} activeFilters={activeFilters}/>
                 <Statistics/>
             </div>
 
@@ -234,75 +240,50 @@ function Filters({filters, setFilters }) {
 
 }
 
-function PlanView({viewType, setViewType}) {
-    const [startDate, setStartDate] = useState(""); // Przechowywanie daty początkowej
-    const [endDate, setEndDate] = useState(""); // Przechowywanie daty końcowej
+function PlanView({ viewType, setViewType, activeFilters }) {
+    const [startDate, setStartDate] = useState("");
+    const [endDate, setEndDate] = useState("");
+
+    // Przykładowe dane
     const exampleSchedule = [
-        {
-            time: "08:00 - 09:30",
-            subject: "Algorytmy i struktury danych",
-            lecturer: "dr inż. Jan Kowalski",
-            room: "Sala 101, Budynek A",
-        },
-        {
-            time: "10:00 - 11:30",
-            subject: "Programowanie obiektowe",
-            lecturer: "mgr Anna Nowak",
-            room: "Sala 202, Budynek B",
-        },
-        {
-            time: "12:00 - 13:30",
-            subject: "Bazy danych",
-            lecturer: "prof. dr hab. Piotr Wiśniewski",
-            room: "Sala 303, Budynek C",
-        },
-        {
-            time: "14:00 - 15:30",
-            subject: "Sieci komputerowe",
-            lecturer: "dr inż. Marek Zieliński",
-            room: "Sala 404, Budynek D",
-        },
+        { time: "08:00 - 09:30", day: "Poniedziałek", subject: "Algorytmy", lecturer: "dr Kowalski", room: "Sala 101" },
+        { time: "10:00 - 11:30", day: "Wtorek", subject: "Bazy danych", lecturer: "prof. Nowak", room: "Sala 202" },
+        // więcej danych...
     ];
+
+    const getWeeklySchedule = () => {
+        const days = ["Poniedziałek", "Wtorek", "Środa", "Czwartek", "Piątek"];
+        return days.map((day) => ({
+            day,
+            schedule: exampleSchedule.filter((entry) => entry.day === day),
+        }));
+    };
+
+    const getMonthlySchedule = () => {
+        const totalDays = 30; // lub dynamicznie obliczaj dni w miesiącu
+        const weeks = [];
+        for (let i = 0; i < 5; i++) {
+            weeks.push(Array.from({ length: 7 }, (_, j) => i * 7 + j + 1 > totalDays ? null : i * 7 + j + 1));
+        }
+        return weeks;
+    };
 
     return (
         <div className="plan-view">
             <header>
                 <div>
                     <label htmlFor="view-type">Widok:</label>
-                    <select
-                        id="view-type"
-                        value={viewType}
-                        onChange={(e) => setViewType(e.target.value)}
-                    >
+                    <select id="view-type" value={viewType} onChange={(e) => setViewType(e.target.value)}>
                         <option value="Dzienny">Dzienny</option>
                         <option value="Tygodniowy">Tygodniowy</option>
                         <option value="Miesięczny">Miesięczny</option>
-                        <option value="Zakres dat">Zakres dat</option>
                     </select>
                 </div>
-                {viewType === "Zakres dat" && (
-                    <div id="date-range">
-                        <label htmlFor="start-date">Od:</label>
-                        <input
-                            id="start-date"
-                            type="date"
-                            value={startDate}
-                            onChange={(e) => setStartDate(e.target.value)}
-                        />
-                        <label htmlFor="end-date">Do:</label>
-                        <input
-                            id="end-date"
-                            type="date"
-                            value={endDate}
-                            onChange={(e) => setEndDate(e.target.value)}
-                        />
-                    </div>
-                )}
             </header>
             <div id="schedule">
                 {viewType === "Dzienny" && (
                     <div>
-                        <h3>Plan zajęć</h3>
+                        <h3>Plan dzienny</h3>
                         {exampleSchedule.map((entry, index) => (
                             <div key={index} className="plan">
                                 <div className="time">{entry.time}</div>
@@ -315,27 +296,40 @@ function PlanView({viewType, setViewType}) {
                         ))}
                     </div>
                 )}
-                {viewType === "Zakres dat" && (
-                    <div>
-                        <h3>
-                            Wybrany zakres:{" "}
-                            {startDate && endDate
-                                ? `${startDate} - ${endDate}`
-                                : "Proszę wybrać zakres dat"}
-                        </h3>
-                        <p>
-                            W przyszłości można tu wyświetlać plan dla wybranego zakresu
-                            dat.
-                        </p>
+                {viewType === "Tygodniowy" && (
+                    <div className="week-grid">
+                        {getWeeklySchedule().map((day, index) => (
+                            <div key={index} className="day-column">
+                                <h4>{day.day}</h4>
+                                {day.schedule.map((entry, i) => (
+                                    <div key={i} className="plan">
+                                        <div className="time">{entry.time}</div>
+                                        <div>{entry.subject}</div>
+                                        <div>{entry.room}</div>
+                                    </div>
+                                ))}
+                            </div>
+                        ))}
                     </div>
                 )}
-                {viewType !== "Dzienny" && viewType !== "Zakres dat" && (
-                    <div>Inne widoki ({viewType}) będą dostępne w przyszłości...</div>
+                {viewType === "Miesięczny" && (
+                    <div className="month-grid">
+                        {getMonthlySchedule().map((week, i) => (
+                            <div key={i} className="week-row">
+                                {week.map((day, j) => (
+                                    <div key={j} className="day-cell">
+                                        {day ? <span>{day}</span> : ""}
+                                    </div>
+                                ))}
+                            </div>
+                        ))}
+                    </div>
                 )}
             </div>
         </div>
     );
 }
+
 
 
 function Statistics() {
