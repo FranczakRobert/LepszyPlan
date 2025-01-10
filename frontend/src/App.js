@@ -57,8 +57,12 @@ function App() {
     });
 
     const showPlan = () => {
-        setActiveFilters(filters); // Ustawia aktywne filtry na te aktualnie wybrane
-        sendRequestToAPI(filters, dateRange); // Wysyła żądanie do API
+        if (!dateRange.from || !dateRange.to) {
+            alert("Proszę wybrać zakres dat.");
+            return;
+        }
+        setActiveFilters(filters);
+        sendRequestToAPI(filters, dateRange);
     };
 
     const setFiltersFromUrl = () => {
@@ -67,25 +71,20 @@ function App() {
 
         queryParams.forEach((value, key) => {
             if (newFilters[key]) {
-                // Jeśli filtr jest tablicą, dodaj wartość do istniejącej tablicy
                 if (Array.isArray(newFilters[key])) {
                     newFilters[key].push(value);
                 } else {
-                    // Przekształć w tablicę
                     newFilters[key] = [newFilters[key], value];
                 }
             } else {
-                // Ustaw wartość bezpośrednio
                 newFilters[key] = value;
             }
         });
 
-        // Ustaw odczytane filtry w stanie
         setFilters((prevFilters) => ({
             ...prevFilters,
             ...newFilters,
         }));
-        console.log("UWAGA: ",filters);
     };
 
     useEffect(() => {
@@ -97,12 +96,22 @@ function App() {
             <header className="header">Lepszy Plan</header>
 
             <div className="container">
-                <Filters filters={filters} setFilters={setFilters}/>
-                <button className="show-schedule" onClick={showPlan} className={activeFilters === filters ? "show-schedule active" : "show-schedule"}>
+                <Filters
+                    filters={filters}
+                    setFilters={setFilters}
+                    dateRange={dateRange}
+                    setDateRange={setDateRange}
+                />
+                <button
+                    onClick={showPlan}
+                    className={
+                        activeFilters === filters ? "show-schedule active" : "show-schedule"
+                    }
+                >
                     Pokaż plan
                 </button>
-                <PlanView viewType={viewType} setViewType={setViewType} activeFilters={activeFilters}/>
-                <Statistics/>
+                <PlanView viewType={viewType} setViewType={setViewType} activeFilters={activeFilters} />
+                <Statistics />
             </div>
 
             <footer className="footer">Strona stworzona przez projekt-syzyfy</footer>
@@ -110,11 +119,98 @@ function App() {
     );
 }
 
-function Filters({filters, setFilters }) {
+
+
+// function App() {
+//     const [activeFilters, setActiveFilters] = useState({});
+//     const [viewType, setViewType] = useState("Dzienny");
+//     const [filters, setFilters] = useState({
+//         studenci: [],
+//         wykladowcy: [],
+//         grupy: [],
+//         kierunki: [],
+//         przedmioty: [],
+//         typStudiow: "",
+//         rokStudiow: "",
+//         wydzialy: "",
+//         budynki: "",
+//         sale: [],
+//     });
+//     const [dateRange, setDateRange] = useState({
+//         from: "",
+//         to: "",
+//     });
+//
+//     const showPlan = () => {
+//         if (!dateRange.from || !dateRange.to) {
+//             alert("Proszę wybrać pełny zakres dat.");
+//             return;
+//         }
+//         setActiveFilters(filters); // Ustawia aktywne filtry na te aktualnie wybrane
+//         sendRequestToAPI(filters, dateRange); // Wysyła żądanie do API
+//     };
+//
+//     const setFiltersFromUrl = () => {
+//         const queryParams = new URLSearchParams(window.location.search);
+//         const newFilters = {};
+//
+//         queryParams.forEach((value, key) => {
+//             if (newFilters[key]) {
+//                 // Jeśli filtr jest tablicą, dodaj wartość do istniejącej tablicy
+//                 if (Array.isArray(newFilters[key])) {
+//                     newFilters[key].push(value);
+//                 } else {
+//                     // Przekształć w tablicę
+//                     newFilters[key] = [newFilters[key], value];
+//                 }
+//             } else {
+//                 // Ustaw wartość bezpośrednio
+//                 newFilters[key] = value;
+//             }
+//         });
+//
+//         // Ustaw odczytane filtry w stanie
+//         setFilters((prevFilters) => ({
+//             ...prevFilters,
+//             ...newFilters,
+//         }));
+//         console.log("UWAGA: ",filters);
+//     };
+//
+//     useEffect(() => {
+//         setFiltersFromUrl();
+//     }, []);
+//
+//     return (
+//         <div className="App">
+//             <header className="header">Lepszy Plan</header>
+//
+//             <div className="container">
+//                 <Filters filters={filters} setFilters={setFilters} dataRange={dateRange} setDateRange={setDateRange}/>
+//                 <button onClick={showPlan} className={activeFilters === filters ? "show-schedule active" : "show-schedule"}>
+//                     Pokaż plan
+//                 </button>
+//                 <PlanView viewType={viewType} setViewType={setViewType} activeFilters={activeFilters}/>
+//                 <Statistics/>
+//             </div>
+//
+//             <footer className="footer">Strona stworzona przez projekt-syzyfy</footer>
+//         </div>
+//     );
+// }
+
+function Filters({filters, setFilters, dateRange, setDateRange }) {
     const [newTeacher, setNewTeacher] = useState("");
     const [newDirection, setNewDirection] = useState("");
     const [newSubject, setNewSubject] = useState("");
     const [newRoom, setNewRoom] = useState("");
+
+    const handleDateChange = (key, value) => {
+        setDateRange((prevRange) => ({
+            ...prevRange,
+            [key]: value,
+        }));
+    };
 
     // Uniwersalna funkcja dodawania
     const addItemToList = (key, value) => {
@@ -209,7 +305,8 @@ function Filters({filters, setFilters }) {
                     {filters.wykladowcy.map((teacher, index) => (
                         <li key={index}>
                             {teacher}{" "}
-                            <button className="button-small" onClick={() => removeTeacher(teacher)}><i className="fas fa-trash"></i></button>
+                            <button className="button-small" onClick={() => removeTeacher(teacher)}><i
+                                className="fas fa-trash"></i></button>
                         </li>
                     ))}
                 </ul>
@@ -229,7 +326,8 @@ function Filters({filters, setFilters }) {
                     {filters.kierunki.map((direction, index) => (
                         <li key={index}>
                             {direction}{" "}
-                            <button className="button-small" onClick={() => removeDirection(direction)}><i className="fas fa-trash"></i></button>
+                            <button className="button-small" onClick={() => removeDirection(direction)}><i
+                                className="fas fa-trash"></i></button>
                         </li>
                     ))}
                 </ul>
@@ -249,7 +347,8 @@ function Filters({filters, setFilters }) {
                     {filters.przedmioty.map((subject, index) => (
                         <li key={index}>
                             {subject}{" "}
-                            <button className="button-small" onClick={() => removeSubject(subject)}><i className="fas fa-trash"></i></button>
+                            <button className="button-small" onClick={() => removeSubject(subject)}><i
+                                className="fas fa-trash"></i></button>
                         </li>
                     ))}
                 </ul>
@@ -269,7 +368,8 @@ function Filters({filters, setFilters }) {
                     {filters.sale.map((room, index) => (
                         <li key={index}>
                             {room}{" "}
-                            <button className="button-small" onClick={() => removeRoom(room)}><i className="fas fa-trash"></i></button>
+                            <button className="button-small" onClick={() => removeRoom(room)}><i
+                                className="fas fa-trash"></i></button>
                         </li>
                     ))}
                 </ul>
@@ -280,6 +380,29 @@ function Filters({filters, setFilters }) {
                 <button onClick={handleSaveFilters}>Zapisz filtry do ulubionych</button>
                 <button onClick={handleCopyToClipboard}>Kopiuj do schowka</button>
             </div>
+
+            {/* Data od */}
+            <div className="filter-group">
+                <label htmlFor="dateFrom">Data od:</label>
+                <input
+                    type="date"
+                    id="dateFrom"
+                    value={dateRange.from}
+                    onChange={(e) => handleDateChange("from", e.target.value)}
+                />
+            </div>
+
+            {/* Data do */}
+            <div className="filter-group">
+                <label htmlFor="dateTo">Data do:</label>
+                <input
+                    type="date"
+                    id="dateTo"
+                    value={dateRange.to}
+                    onChange={(e) => handleDateChange("to", e.target.value)}
+                />
+            </div>
+
         </div>
     );
 
