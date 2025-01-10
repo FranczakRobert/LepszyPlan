@@ -99,7 +99,7 @@ function App() {
 
             <div className="container">
                 <Filters filters={filters} setFilters={setFilters}/>
-                <button onClick={showPlan} className={activeFilters === filters ? "active" : ""}>
+                <button className="show-schedule" onClick={showPlan} className={activeFilters === filters ? "show-schedule active" : "show-schedule"}>
                     Pokaż plan
                 </button>
                 <PlanView viewType={viewType} setViewType={setViewType} activeFilters={activeFilters}/>
@@ -314,7 +314,28 @@ function PlanView({ viewType, setViewType, activeFilters }) {
                     </div>
                 )}
                 {viewType === "Miesięczny" && (
+                    // <div className="month-grid">
+                    //     {getMonthlySchedule().map((week, i) => (
+                    //         <div key={i} className="week-row">
+                    //             {week.map((day, j) => (
+                    //                 <div
+                    //                     key={j}
+                    //                     className={classNames("day-cell", {empty: !day})}
+                    //                 >
+                    //                     {day ? <span>{day}</span> : ""}
+                    //                 </div>
+                    //             ))}
+                    //         </div>
+                    //     ))}
+                    // </div>
                     <div className="month-grid">
+                        {/* Nagłówek z dniami tygodnia */}
+                        <div className="week-header">
+                            {["Poniedziałek", "Wtorek", "Środa", "Czwartek", "Piątek", "Sobota", "Niedziela"].map((day, index) => (
+                                <div key={index} className="day-header day-column">{day}</div>
+                            ))}
+                    </div>
+
                         {getMonthlySchedule().map((week, i) => (
                             <div key={i} className="week-row">
                                 {week.map((day, j) => (
@@ -328,7 +349,6 @@ function PlanView({ viewType, setViewType, activeFilters }) {
                             </div>
                         ))}
                     </div>
-
                 )}
             </div>
         </div>
