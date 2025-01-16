@@ -329,36 +329,101 @@ function Filters({filters, setFilters, dateRange, setDateRange }) {
 
 }
 
-function PlanView({viewType, setViewType,dateRange,planData}) {
-    const [startDate, setStartDate] = useState("");
-    const [endDate, setEndDate] = useState("");
+function PlanView({ viewType, setViewType, dateRange, planData }) {
+    const [currentDate, setCurrentDate] = useState(new Date());
 
-    const exampleSchedule = [
-        { time: "08:00 - 09:30", day: "Poniedziałek", subject: "Algorytmy", lecturer: "dr Kowalski", room: "Sala 101", date: "2025-01-01" },
-        { time: "10:00 - 11:30", day: "Wtorek", subject: "Bazy danych", lecturer: "prof. Nowak", room: "Sala 202", date: "2025-01-02" },
-        { time: "12:00 - 13:30", day: "Środa", subject: "Programowanie", lecturer: "mgr Nowak", room: "Sala 303", date: "2025-01-03" },
-        // więcej danych...
-    ];
+    useEffect(() => {
+        // Reset date range when viewType changes
+        if (viewType === "Dzienny") {
+            setCurrentDate(new Date());
+        } else if (viewType === "Tygodniowy") {
+            const startOfWeek = getStartOfWeek(new Date());
+            setCurrentDate(startOfWeek);
+        } else if (viewType === "Miesięczny") {
+            const startOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
+            setCurrentDate(startOfMonth);
+        }
+    }, [viewType]);
+
+    const getStartOfWeek = (date) => {
+        const day = date.getDay();
+        const diff = date.getDate() - day + (day === 0 ? -6 : 1); // Adjust when day is Sunday
+        return new Date(date.setDate(diff));
+    };
 
     const getWeeklySchedule = () => {
-        const days = ["Poniedziałek", "Wtorek", "Środa", "Czwartek", "Piątek"];
-        return days.map((day) => ({
-            day,
-            schedule: exampleSchedule.filter((entry) => entry.day === day),
+        const startOfWeek = getStartOfWeek(currentDate);
+        const weekDays = Array.from({ length: 7 }, (_, i) => {
+            const date = new Date(startOfWeek);
+            date.setDate(startOfWeek.getDate() + i);
+            return date;
+        });
+
+        return weekDays.map((day) => ({
+            day: day.toLocaleDateString('pl-PL', { weekday: 'long' }),
+            schedule: (planData || []).filter(
+                (entry) => new Date(entry.date).toDateString() === day.toDateString()
+            ),
         }));
     };
 
     const getMonthlySchedule = () => {
-        const totalDays = 30; // lub dynamicznie obliczaj dni w miesiącu
+        const year = currentDate.getFullYear();
+        const month = currentDate.getMonth();
+        const firstDayOfMonth = new Date(year, month, 1);
+        const lastDayOfMonth = new Date(year, month + 1, 0);
+
+        const totalDays = lastDayOfMonth.getDate();
+        const firstWeekday = (firstDayOfMonth.getDay() + 6) % 7; // Convert Sunday (0) to the end of the week
+
         const weeks = [];
-        for (let i = 0; i < 5; i++) {
-            weeks.push(Array.from({ length: 7 }, (_, j) => i * 7 + j + 1 > totalDays ? null : i * 7 + j + 1));
+        let days = []//Array(firstWeekday).fill(null); // Fill empty days for the first week at the beginning
+
+        for (let day = 0; day <= firstWeekday; day++) {
+            days.unshift(null);
         }
+
+        for (let day = 1; day <= totalDays; day++) {
+            days.push(day);
+            if (days.length === 7) {
+                weeks.push(days);
+                console.log(days);
+                days = [];
+            }
+        }
+
+        // Add remaining days to the last week, filling the week to 7 days
+        if (days.length > 0) {
+            while (days.length < 7) {
+                days.push(null); // Fill empty days at the end of the last week
+            }
+            weeks.push(days);
+        }
+
         return weeks;
     };
 
-    return (
+    const handlePrevious = () => {
+        if (viewType === "Dzienny") {
+            setCurrentDate(new Date(currentDate.setDate(currentDate.getDate() - 1)));
+        } else if (viewType === "Tygodniowy") {
+            setCurrentDate(new Date(currentDate.setDate(currentDate.getDate() - 7)));
+        } else if (viewType === "Miesięczny") {
+            setCurrentDate(new Date(currentDate.setMonth(currentDate.getMonth() - 1)));
+        }
+    };
 
+    const handleNext = () => {
+        if (viewType === "Dzienny") {
+            setCurrentDate(new Date(currentDate.setDate(currentDate.getDate() + 1)));
+        } else if (viewType === "Tygodniowy") {
+            setCurrentDate(new Date(currentDate.setDate(currentDate.getDate() + 7)));
+        } else if (viewType === "Miesięczny") {
+            setCurrentDate(new Date(currentDate.setMonth(currentDate.getMonth() + 1)));
+        }
+    };
+
+    return (
         <div className="plan-view">
             <header>
                 <div>
@@ -369,26 +434,24 @@ function PlanView({viewType, setViewType,dateRange,planData}) {
                         <option value="Miesięczny">Miesięczny</option>
                     </select>
                 </div>
+                <div className="navigation">
+                    <button onClick={handlePrevious}>◀</button>
+                    <span>{
+                        viewType === "Dzienny" ? currentDate.toLocaleDateString() :
+                            viewType === "Tygodniowy" ? `Tydzień ${currentDate.toLocaleDateString()}` :
+                                `Miesiąc ${currentDate.toLocaleString('default', { month: 'long' })} ${currentDate.getFullYear()}`
+                    }</span>
+                    <button onClick={handleNext}>▶</button>
+                </div>
             </header>
-            <div></div>
-            {/*<div>*/}
-            {/*    <h2>Plan Zajęć</h2>*/}
-            {/*    /!* Render the plan data here *!/*/}
-            {/*    {planData ? (*/}
-            {/*        <div>{JSON.stringify(planData)}</div> // Example of rendering data; replace with your own rendering logic*/}
-            {/*    ) : (*/}
-            {/*        <p>Proszę wprowadzić filtry i wybrać daty, aby wyświetlić plan.</p>*/}
-            {/*    )}*/}
-            {/*</div>*/}
+
             <div id="schedule">
                 {viewType === "Dzienny" && (
                     <div>
                         <h3>Plan dzienny</h3>
-                        {exampleSchedule.filter(entry =>
-                            new Date(entry.date) >= new Date(dateRange.startDate) &&
-                            new Date(entry.date) <= new Date(dateRange.endDate)).map((entry, index) => (
+                        {(planData || []).filter(entry => new Date(entry.date).toDateString() === currentDate.toDateString()).map((entry, index) => (
                             <div key={index} className="plan">
-                                <div className="time">{dateRange.startDate}</div>
+                                <div className="time">{entry.time}</div>
                                 <div className="details">
                                     <div>Przedmiot: {entry.subject}</div>
                                     <div>Wykładowca: {entry.lecturer}</div>
@@ -396,44 +459,45 @@ function PlanView({viewType, setViewType,dateRange,planData}) {
                                 </div>
                             </div>
                         ))}
+                        {(!planData || planData.length === 0) && <p>Brak danych do wyświetlenia.</p>}
                     </div>
                 )}
+
                 {viewType === "Tygodniowy" && (
                     <div className="week-grid">
-                        {getWeeklySchedule().map((day, index) => (
-                            <div key={index} className="day-column">
-                                <h4>{day.day}</h4>
-                                {planData.map((entry, i) => (
-                                    <div key={i} className="plan">
-                                        <div className="time">
-                                            {/* Format the time range for display */}
-                                            {new Date(entry.from).toLocaleString()} - {new Date(entry.to).toLocaleString()}
+                        {["Poniedziałek", "Wtorek", "Środa", "Czwartek", "Piątek", "Sobota", "Niedziela"].map((dayName, index) => {
+                            const dayData = getWeeklySchedule().find(day => day.day === dayName) || { day: dayName, schedule: [] };
+                            return (
+                                <div key={index} className="day-column">
+                                    <h4>{dayData.day}</h4>
+                                    {dayData.schedule.map((entry, i) => (
+                                        <div key={i} className="plan">
+                                            <div className="time">{entry.time}</div>
+                                            <div className="details">
+                                                <div>Przedmiot: {entry.subject}</div>
+                                                <div>Wykładowca: {entry.lecturer}</div>
+                                                <div>Sala: {entry.room}</div>
+                                            </div>
                                         </div>
-                                        <div className="subject">{entry.subjectName}</div>
-                                        <div className="teacher">{entry.teacher}</div>
-                                        <div className="room">{entry.roomName}</div>
-                                    </div>
-                                ))}
-
-                            </div>
-                        ))}
+                                    ))}
+                                    {dayData.schedule.length === 0 && <p>Brak danych do wyświetlenia.</p>}
+                                </div>
+                            );
+                        })}
                     </div>
                 )}
+
                 {viewType === "Miesięczny" && (
                     <div className="month-grid">
-                        {/* Nagłówek z dniami tygodnia */}
                         <div className="week-header">
-                            {["Poniedziałek", "Wtorek", "Środa", "Czwartek", "Piątek", "Sobota", "Niedziela"].map((day, index) => (
+                            {"Poniedziałek, Wtorek, Środa, Czwartek, Piątek, Sobota, Niedziela".split(", ").map((day, index) => (
                                 <div key={index} className="day-header day-column">{day}</div>
                             ))}
                         </div>
                         {getMonthlySchedule().map((week, i) => (
                             <div key={i} className="week-row">
                                 {week.map((day, j) => (
-                                    <div
-                                        key={j}
-                                        className={classNames("day-cell", {empty: !day})}
-                                    >
+                                    <div key={j} className={classNames("day-cell", { empty: !day })}>
                                         {day ? <span>{day}</span> : ""}
                                     </div>
                                 ))}
@@ -445,7 +509,6 @@ function PlanView({viewType, setViewType,dateRange,planData}) {
         </div>
     );
 }
-
 
 function Statistics() {
     return (
