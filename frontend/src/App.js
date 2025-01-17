@@ -115,7 +115,7 @@ function App() {
                 >
                     Pokaż plan
                 </button>
-                <PlanView viewType={viewType} setViewType={setViewType} dateRange={dateRange} planData={planData}/>
+                <PlanView viewType={viewType} setViewType={setViewType} planData={planData}/>
                 <Statistics />
             </div>
 
@@ -329,8 +329,10 @@ function Filters({filters, setFilters, dateRange, setDateRange }) {
 
 }
 
-function PlanView({ viewType, setViewType, dateRange, planData }) {
+function PlanView({ viewType, setViewType, planData }) {
     const [currentDate, setCurrentDate] = useState(new Date());
+    const [showModal, setShowModal] = useState(false); // Stan dla widoczności modala
+    const [selectedDayData, setSelectedDayData] = useState([]); // Stan dla danych wybranego dnia
 
     useEffect(() => {
         // Reset date range when viewType changes
@@ -353,14 +355,14 @@ function PlanView({ viewType, setViewType, dateRange, planData }) {
 
     const getWeeklySchedule = () => {
         const startOfWeek = getStartOfWeek(currentDate);
-        const weekDays = Array.from({ length: 7 }, (_, i) => {
+        const weekDays = Array.from({length: 7}, (_, i) => {
             const date = new Date(startOfWeek);
             date.setDate(startOfWeek.getDate() + i);
             return date;
         });
 
         return weekDays.map((day) => ({
-            day: day.toLocaleDateString('pl-PL', { weekday: 'long' }),
+            day: day.toLocaleDateString('pl-PL', {weekday: 'long'}),
             schedule: (planData || []).filter(
                 (entry) => new Date(entry.date).toDateString() === day.toDateString()
             ),
@@ -387,7 +389,6 @@ function PlanView({ viewType, setViewType, dateRange, planData }) {
             days.push(day);
             if (days.length === 7) {
                 weeks.push(days);
-                console.log(days);
                 days = [];
             }
         }
@@ -423,6 +424,17 @@ function PlanView({ viewType, setViewType, dateRange, planData }) {
         }
     };
 
+
+    function openDayDetails(dayData) {
+        setSelectedDayData(dayData);
+        setShowModal(true);
+    }
+
+    function closeModal() {
+        setShowModal(false);
+        setSelectedDayData([]);
+    }
+
     return (
         <div className="plan-view">
             <header>
@@ -439,7 +451,7 @@ function PlanView({ viewType, setViewType, dateRange, planData }) {
                     <span>{
                         viewType === "Dzienny" ? currentDate.toLocaleDateString() :
                             viewType === "Tygodniowy" ? `Tydzień ${currentDate.toLocaleDateString()}` :
-                                `Miesiąc ${currentDate.toLocaleString('default', { month: 'long' })} ${currentDate.getFullYear()}`
+                                `Miesiąc ${currentDate.toLocaleString('default', {month: 'long'})} ${currentDate.getFullYear()}`
                     }</span>
                     <button onClick={handleNext}>▶</button>
                 </div>
@@ -449,43 +461,96 @@ function PlanView({ viewType, setViewType, dateRange, planData }) {
                 {viewType === "Dzienny" && (
                     <div>
                         <h3>Plan dzienny</h3>
-                        {(planData || []).filter(entry => new Date(entry.date).toDateString() === currentDate.toDateString()).map((entry, index) => (
-                            <div key={index} className="plan">
-                                <div className="time">{entry.time}</div>
-                                <div className="details">
-                                    <div>Przedmiot: {entry.subject}</div>
-                                    <div>Wykładowca: {entry.lecturer}</div>
-                                    <div>Sala: {entry.room}</div>
+                        {(planData || [])
+                            .filter(entry => new Date(entry.from).toDateString() === currentDate.toDateString())
+                            .map((entry, index) => (
+                                <div key={index} className="plan">
+                                    <div className="time">
+                                        {new Date(entry.from).toLocaleTimeString([], {
+                                            hour: '2-digit',
+                                            minute: '2-digit'
+                                        })} -
+                                        {new Date(entry.to).toLocaleTimeString([], {
+                                            hour: '2-digit',
+                                            minute: '2-digit'
+                                        })}
+                                    </div>
+                                    <div className="details">
+                                        <div>Przedmiot: {entry.subjectName}</div>
+                                        <div>Wykładowca: {entry.teacher}</div>
+                                        <div>Sala: {entry.roomName}</div>
+                                    </div>
                                 </div>
-                            </div>
-                        ))}
-                        {(!planData || planData.length === 0) && <p>Brak danych do wyświetlenia.</p>}
+                            ))}
+                        {(planData || []).filter(entry => new Date(entry.from).toDateString() === currentDate.toDateString()).length === 0 && (
+                            <p>Brak zajęć na ten dzień.</p>
+                        )}
                     </div>
                 )}
 
+
                 {viewType === "Tygodniowy" && (
                     <div className="week-grid">
-                        {["Poniedziałek", "Wtorek", "Środa", "Czwartek", "Piątek", "Sobota", "Niedziela"].map((dayName, index) => {
-                            const dayData = getWeeklySchedule().find(day => day.day === dayName) || { day: dayName, schedule: [] };
-                            return (
+                        {(() => {
+                            // Znajdź początek i koniec tygodnia
+                            const startOfWeek = new Date(currentDate);
+                            const endOfWeek = new Date(currentDate);
+                            startOfWeek.setDate(currentDate.getDate() - currentDate.getDay() + 1); // Poniedziałek
+                            endOfWeek.setDate(currentDate.getDate() - currentDate.getDay() + 7);  // Niedziela
+
+                            // Filtrowanie zajęć w zakresie tygodnia
+                            const weeklyData = (planData || []).filter(entry => {
+                                const entryDate = new Date(entry.from);
+                                return entryDate >= startOfWeek && entryDate <= endOfWeek;
+                            });
+
+                            // Grupowanie zajęć według dni tygodnia
+                            const daysOfWeek = ["Poniedziałek", "Wtorek", "Środa", "Czwartek", "Piątek", "Sobota", "Niedziela"];
+                            const groupedData = daysOfWeek.map((day, index) => {
+                                const dayStart = new Date(startOfWeek);
+                                dayStart.setDate(startOfWeek.getDate() + index);
+                                return {
+                                    dayName: day,
+                                    date: dayStart,
+                                    entries: weeklyData.filter(entry =>
+                                        new Date(entry.from).toDateString() === dayStart.toDateString()
+                                    ),
+                                };
+                            });
+
+                            // Renderowanie grupowanych danych
+                            return groupedData.map((group, index) => (
                                 <div key={index} className="day-column">
-                                    <h4>{dayData.day}</h4>
-                                    {dayData.schedule.map((entry, i) => (
-                                        <div key={i} className="plan">
-                                            <div className="time">{entry.time}</div>
-                                            <div className="details">
-                                                <div>Przedmiot: {entry.subject}</div>
-                                                <div>Wykładowca: {entry.lecturer}</div>
-                                                <div>Sala: {entry.room}</div>
+                                    <h4>{group.dayName} ({group.date.toLocaleDateString()})</h4>
+                                    {group.entries.length > 0 ? (
+                                        group.entries.map((entry, i) => (
+                                            <div key={i} className="plan">
+                                                <div className="time">
+                                                    {new Date(entry.from).toLocaleTimeString([], {
+                                                        hour: '2-digit',
+                                                        minute: '2-digit'
+                                                    })} -
+                                                    {new Date(entry.to).toLocaleTimeString([], {
+                                                        hour: '2-digit',
+                                                        minute: '2-digit'
+                                                    })}
+                                                </div>
+                                                <div className="details">
+                                                    <div>Przedmiot: {entry.subjectName}</div>
+                                                    <div>Wykładowca: {entry.teacher}</div>
+                                                    <div>Sala: {entry.roomName}</div>
+                                                </div>
                                             </div>
-                                        </div>
-                                    ))}
-                                    {dayData.schedule.length === 0 && <p>Brak danych do wyświetlenia.</p>}
+                                        ))
+                                    ) : (
+                                        <p></p>
+                                    )}
                                 </div>
-                            );
-                        })}
+                            ));
+                        })()}
                     </div>
                 )}
+
 
                 {viewType === "Miesięczny" && (
                     <div className="month-grid">
@@ -496,16 +561,60 @@ function PlanView({ viewType, setViewType, dateRange, planData }) {
                         </div>
                         {getMonthlySchedule().map((week, i) => (
                             <div key={i} className="week-row">
-                                {week.map((day, j) => (
-                                    <div key={j} className={classNames("day-cell", { empty: !day })}>
-                                        {day ? <span>{day}</span> : ""}
-                                    </div>
-                                ))}
+                                {week.map((day, j) => {
+                                    const dayDate = day ? new Date(currentDate.getFullYear(), currentDate.getMonth(), day) : null;
+                                    const dayData = dayDate ? (planData || []).filter(entry =>
+                                        new Date(entry.from).toDateString() === dayDate.toDateString()
+                                    ) : [];
+
+                                    return (
+                                        <div
+                                            key={j}
+                                            className={classNames("day-cell", { empty: !day })}
+                                            onClick={() => day && dayData.length > 0 && openDayDetails(dayData)}
+                                        >
+                                            {day && (
+                                                <>
+                                                    <span className="day-number">{day}</span>
+                                                    {dayData.length > 0 && (
+                                                        <span className="event-count">{dayData.length} zajęć</span>
+                                                    )}
+                                                </>
+                                            )}
+                                        </div>
+                                    );
+                                })}
                             </div>
                         ))}
                     </div>
                 )}
             </div>
+
+            {showModal && (
+                <div className="modal">
+                    <div className="modal-content">
+                        <button onClick={closeModal} className="close-button">×</button>
+                        <h4>Zajęcia w wybranym dniu</h4>
+                        {selectedDayData.length > 0 ? (
+                            selectedDayData.map((entry, index) => (
+                                <div key={index} className="plan">
+                                    <div className="time">
+                                        {new Date(entry.from).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} -
+                                        {new Date(entry.to).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                    </div>
+                                    <div className="details">
+                                        <div>Przedmiot: {entry.subjectName}</div>
+                                        <div>Wykładowca: {entry.teacher}</div>
+                                        <div>Sala: {entry.roomName}</div>
+                                    </div>
+                                </div>
+                            ))
+                        ) : (
+                            <p>Brak zajęć w tym dniu.</p>
+                        )}
+                    </div>
+                </div>
+            )}
         </div>
     );
 }
