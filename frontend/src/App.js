@@ -360,7 +360,10 @@ function PlanView({ viewType, setViewType, planData }) {
         const lastDayOfMonth = new Date(year, month + 1, 0);
 
         const totalDays = lastDayOfMonth.getDate();
-        const firstWeekday = (firstDayOfMonth.getDay() + 6) % 7; // Convert Sunday (0) to the end of the week
+        let firstWeekday = (firstDayOfMonth.getDay() + 6) % 7; // Convert Sunday (0) to the end of the week
+        if (firstWeekday===7){
+            firstWeekday=0;
+        }
 
         const weeks = [];
         let days = []//Array(firstWeekday).fill(null); // Fill empty days for the first week at the beginning
