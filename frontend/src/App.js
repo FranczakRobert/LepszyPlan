@@ -334,6 +334,7 @@ function PlanView({ viewType, setViewType, planData }) {
     const [showModal, setShowModal] = useState(false); // Stan dla widoczności modala
     const [selectedDayData, setSelectedDayData] = useState([]); // Stan dla danych wybranego dnia
 
+
     useEffect(() => {
         // Reset date range when viewType changes
         if (viewType === "Dzienny") {
@@ -360,16 +361,13 @@ function PlanView({ viewType, setViewType, planData }) {
         const lastDayOfMonth = new Date(year, month + 1, 0);
 
         const totalDays = lastDayOfMonth.getDate();
-        let firstWeekday = (firstDayOfMonth.getDay() + 6) % 7; // Convert Sunday (0) to the end of the week
-        if (firstWeekday===7){
-            firstWeekday=0;
-        }
+        const firstWeekday = (firstDayOfMonth.getDay() + 6) % 7; // Convert Sunday (0) to the end of the week
 
         const weeks = [];
         let days = []//Array(firstWeekday).fill(null); // Fill empty days for the first week at the beginning
 
-        for (let day = 0; day <= firstWeekday; day++) {
-            days.unshift(null);
+        for (let day = 0; day < firstWeekday; day++) {
+                days.unshift(null);
         }
 
         for (let day = 1; day <= totalDays; day++) {
