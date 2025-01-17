@@ -353,22 +353,6 @@ function PlanView({ viewType, setViewType, planData }) {
         return new Date(date.setDate(diff));
     };
 
-    const getWeeklySchedule = () => {
-        const startOfWeek = getStartOfWeek(currentDate);
-        const weekDays = Array.from({length: 7}, (_, i) => {
-            const date = new Date(startOfWeek);
-            date.setDate(startOfWeek.getDate() + i);
-            return date;
-        });
-
-        return weekDays.map((day) => ({
-            day: day.toLocaleDateString('pl-PL', {weekday: 'long'}),
-            schedule: (planData || []).filter(
-                (entry) => new Date(entry.date).toDateString() === day.toDateString()
-            ),
-        }));
-    };
-
     const getMonthlySchedule = () => {
         const year = currentDate.getFullYear();
         const month = currentDate.getMonth();
@@ -426,8 +410,13 @@ function PlanView({ viewType, setViewType, planData }) {
 
 
     function openDayDetails(dayData) {
-        setSelectedDayData(dayData);
-        setShowModal(true);
+        if (dayData.length===0){
+            setShowModal(false);
+        }
+        else {
+            setSelectedDayData(dayData);
+            setShowModal(true);
+        }
     }
 
     function closeModal() {
@@ -571,7 +560,11 @@ function PlanView({ viewType, setViewType, planData }) {
                                         <div
                                             key={j}
                                             className={classNames("day-cell", { empty: !day })}
-                                            onClick={() => day && dayData.length > 0 && openDayDetails(dayData)}
+                                            onClick={() => {
+                                                if (day) {
+                                                    openDayDetails(dayData.length > 0 ? dayData : []);
+                                                }
+                                            }}
                                         >
                                             {day && (
                                                 <>
@@ -594,13 +587,24 @@ function PlanView({ viewType, setViewType, planData }) {
                 <div className="modal">
                     <div className="modal-content">
                         <button onClick={closeModal} className="close-button">×</button>
-                        <h4>Zajęcia w wybranym dniu</h4>
+                        <h4>Zajęcia w dniu {new Date(selectedDayData[0]?.from).toLocaleDateString('pl-PL', {
+                            day: 'numeric',
+                            month: 'long',
+                            year: 'numeric'
+                        })}</h4>
+
                         {selectedDayData.length > 0 ? (
                             selectedDayData.map((entry, index) => (
                                 <div key={index} className="plan">
                                     <div className="time">
-                                        {new Date(entry.from).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} -
-                                        {new Date(entry.to).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                        {new Date(entry.from).toLocaleTimeString([], {
+                                            hour: '2-digit',
+                                            minute: '2-digit'
+                                        })} -
+                                        {new Date(entry.to).toLocaleTimeString([], {
+                                            hour: '2-digit',
+                                            minute: '2-digit'
+                                        })}
                                     </div>
                                     <div className="details">
                                         <div>Przedmiot: {entry.subjectName}</div>
