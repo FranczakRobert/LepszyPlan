@@ -127,6 +127,7 @@ function App() {
 
 
 function Filters({filters, setFilters, dateRange, setDateRange }) {
+    const [newStudent, setNewStudent] = useState("");
     const [newTeacher, setNewTeacher] = useState("");
     const [newDirection, setNewDirection] = useState("");
     const [newSubject, setNewSubject] = useState("");
@@ -160,6 +161,9 @@ function Filters({filters, setFilters, dateRange, setDateRange }) {
     };
 
     // Specjalistyczne funkcje dla każdej grupy
+
+    const addStudent = () => addItemToList("studenci", newStudent);
+    const removeStudent = (student) => removeItemFromList("studenci", student);
     const addTeacher = () => addItemToList("wykladowcy", newTeacher);
     const removeTeacher = (teacher) => removeItemFromList("wykladowcy", teacher);
 
@@ -189,7 +193,7 @@ function Filters({filters, setFilters, dateRange, setDateRange }) {
             .map(([key, value]) => {
                 // Sprawdzamy, czy wartość jest tablicą i odpowiednio ją przetwarzamy
                 if (Array.isArray(value)) {
-                    return value.map(v => `${encodeURIComponent(key)}=${encodeURIComponent(v)}`).join('&');
+                    return value.map(v => `${encodeURIComponent(key)}[]=${encodeURIComponent(v)}`).join('&');
                 }
                 return `${encodeURIComponent(key)}=${encodeURIComponent(value)}`;
             })
@@ -211,6 +215,26 @@ function Filters({filters, setFilters, dateRange, setDateRange }) {
     return (
         <div className="filters">
 
+            {/* Studenci - nr albumu */}
+            <div className="filter-group">
+                <h2>Nr albumu</h2>
+                <input
+                    type="text"
+                    value={newStudent}
+                    placeholder="Wpisz nr albumu"
+                    onChange={(e) => setNewStudent(e.target.value)}
+                />
+                <button onClick={addStudent}>Dodaj</button>
+                <ul>
+                    {filters.studenci.map((student, index) => (
+                        <li key={index}>
+                            {student}{" "}
+                            <button className="button-small" onClick={() => removeStudent(student)}><i
+                                className="fas fa-trash"></i></button>
+                        </li>
+                    ))}
+                </ul>
+            </div>
 
             {/* Wykładowcy */}
             <div className="filter-group">
