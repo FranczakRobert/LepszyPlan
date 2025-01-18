@@ -40,13 +40,8 @@ function App() {
     const [filters, setFilters] = useState({
         studenci: [],
         wykladowcy: [],
-        grupy: [],
         kierunki: [],
         przedmioty: [],
-        typStudiow: "",
-        rokStudiow: "",
-        wydzialy: "",
-        budynki: "",
         sale: [],
     });
     const [dateRange, setDateRange] = useState({
@@ -191,14 +186,19 @@ function Filters({filters, setFilters, dateRange, setDateRange }) {
 
     const handleCopyToClipboard = () => {
         // Tworzenie query stringa z filtrów
-        const queryString = Object.entries(filters)
-            .map(([key, value]) => {
-                // Sprawdzamy, czy wartość jest tablicą i odpowiednio ją przetwarzamy
+        const queryString = [
+            // Przetwarzanie `filters`
+            ...Object.entries(filters).flatMap(([key, value]) => {
                 if (Array.isArray(value)) {
-                    return value.map(v => `${encodeURIComponent(key)}[]=${encodeURIComponent(v)}`).join('&');
+                    return value.map(v => `${encodeURIComponent(key)}[]=${encodeURIComponent(v)}`);
                 }
                 return `${encodeURIComponent(key)}=${encodeURIComponent(value)}`;
-            })
+            }),
+            // Dodanie `dateRange.from` i `dateRange.to` (jeśli są ustawione)
+            dateRange.from ? `from=${encodeURIComponent(dateRange.from)}` : null,
+            dateRange.to ? `to=${encodeURIComponent(dateRange.to)}` : null,
+        ]
+            .filter(Boolean) // Usunięcie `null` lub pustych wartości
             .join('&');
 
         // Stworzenie pełnego URL z query stringiem
@@ -213,6 +213,7 @@ function Filters({filters, setFilters, dateRange, setDateRange }) {
             alert("Wystąpił błąd podczas zapisywania do schowka.");
         });
     };
+
 
     return (
         <div className="filters">
