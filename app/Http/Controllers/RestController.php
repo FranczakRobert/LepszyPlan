@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\DB;
 class RestController extends Controller
 {
 
-    public function __construct(TeacherServiceDB $teacherServiceDB)
+    public function __construct()
     {
 
     }
