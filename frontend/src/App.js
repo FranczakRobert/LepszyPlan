@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import axios from "axios";
 import classNames from "classnames";
 import "./App.css";
 
@@ -64,10 +65,10 @@ function App() {
             });
     };
 
-    const setFiltersFromUrl = () => {
+    const setFiltersFromUrl = async () => {
         const queryParams = new URLSearchParams(window.location.search);
         const newFilters = {};
-        let newDateRange = {from: "",to:""};
+        let newDateRange = {from: "", to: ""};
 
         queryParams.forEach((value, key) => {
             if (key === "from" || key === "to") {
@@ -92,6 +93,23 @@ function App() {
         }));
 
         setDateRange(newDateRange);
+    console.log("Url params:", queryParams);
+        // Sprawdzenie, czy są jakieś filtry
+        if (queryParams.toString()) {
+            const apiUrl = `http://localhost:8000/generate-plan-url?${queryParams}`;
+            console.log("URL do zapytania:", apiUrl);
+
+            try {
+                const response = await axios.get(apiUrl); // Wysłanie żądania GET
+                //console.log("Dane z backendu:", response.data); // Obsługa odpowiedzi
+                setPlanData(response.data);
+            } catch (error) {
+                console.error("Błąd podczas pobierania danych:", error);
+            }
+        } else {
+            console.log("Brak filtrów w URL.");
+        }
+
     };
 
     useEffect(() => {
