@@ -75,14 +75,16 @@ function App() {
         const newFilters = {};
 
         queryParams.forEach((value, key) => {
-            if (newFilters[key]) {
-                if (Array.isArray(newFilters[key])) {
-                    newFilters[key].push(value);
-                } else {
-                    newFilters[key] = [newFilters[key], value];
+            // Obsługa tablic (np. studenci[])
+            if (key.endsWith('[]')) {
+                const cleanKey = key.slice(0, -2); // Usunięcie "[]" z końca klucza
+                if (!newFilters[cleanKey]) {
+                    newFilters[cleanKey] = [];
                 }
+                newFilters[cleanKey].push(value);
             } else {
-                newFilters[key] = value;
+                // Obsługa pustych wartości jako null
+                newFilters[key] = value || null;
             }
         });
 
@@ -335,10 +337,8 @@ function Filters({filters, setFilters, dateRange, setDateRange }) {
                     value={dateRange.from}
                     onChange={(e) => handleDateChange("from", e.target.value)}
                 />
-            </div>
 
             {/* Data do */}
-            <div className="filter-group">
                 <label htmlFor="dateTo">Data do:</label>
                 <input
                     type="date"
