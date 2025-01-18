@@ -7,7 +7,6 @@ function sendRequestToAPI(filters, dateRange) {
         students: filters.studenci.length > 0 ? filters.studenci : null,
         teachers: filters.wykladowcy.length > 0 ? filters.wykladowcy : null,
         subjects: filters.przedmioty.length > 0 ? filters.przedmioty : null,
-        groups: filters.grupy.length > 0 ? filters.grupy : null,
         rooms: filters.sale.length > 0 ? filters.sale : null,
         from: dateRange.from || null,
         to: dateRange.to || null,
@@ -68,10 +67,14 @@ function App() {
     const setFiltersFromUrl = () => {
         const queryParams = new URLSearchParams(window.location.search);
         const newFilters = {};
+        let newDateRange = {from: "",to:""};
 
         queryParams.forEach((value, key) => {
-            // Obsługa tablic (np. studenci[])
-            if (key.endsWith('[]')) {
+            if (key === "from" || key === "to") {
+                // Ustawienie wartości dla `dateRange`
+                newDateRange[key] = value || ""; // Jeśli wartość jest pusta, ustaw pusty string
+            } else if (key.endsWith("[]")) {
+                // Obsługa tablic (np. studenci[])
                 const cleanKey = key.slice(0, -2); // Usunięcie "[]" z końca klucza
                 if (!newFilters[cleanKey]) {
                     newFilters[cleanKey] = [];
@@ -87,6 +90,8 @@ function App() {
             ...prevFilters,
             ...newFilters,
         }));
+
+        setDateRange(newDateRange);
     };
 
     useEffect(() => {
