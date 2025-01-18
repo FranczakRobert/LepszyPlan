@@ -8,11 +8,10 @@ use Illuminate\Support\Facades\DB;
 
 class RestController extends Controller
 {
-    private $teacherServiceDB;
 
     public function __construct(TeacherServiceDB $teacherServiceDB)
     {
-        $this->teacherServiceDB = $teacherServiceDB;
+
     }
 
     public function generatePlan(Request $request): \Illuminate\Http\JsonResponse
