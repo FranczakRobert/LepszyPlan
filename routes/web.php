@@ -27,3 +27,4 @@ Route::get('teachers/surname/{surname}', [\App\Http\Controllers\TeacherControlle
 
 // REST
 Route::post('plan', [\App\Http\Controllers\RestController::class, 'generatePlan']);
+Route::get('generate-plan-url', [\App\Http\Controllers\RestController::class, 'generatePlanFromUrl']);

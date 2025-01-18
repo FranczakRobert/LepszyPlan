@@ -30,6 +30,37 @@ class RestController extends Controller
             'to' => 'required|date|after_or_equal:from',
         ]);
 
+        return $this->generateResponse($validated);
+    }
+
+    public function generatePlanFromUrl(Request $request): \Illuminate\Http\JsonResponse
+    {
+        $subjects = $request->query('subjects');
+        $teachers = $request->query('teachers');
+        $groups = $request->query('groups');
+        $rooms = $request->query('rooms');
+        $from = $request->query('from');
+        $to = $request->query('to');
+
+        $validated = $request->validate([
+            'teachers' => 'nullable',
+            'subjects' => 'nullable',
+            'groups' => 'nullable',
+            'rooms' => 'nullable',
+            'from' => 'required|date',
+            'to' => 'required|date|after_or_equal:from',
+        ]);
+
+        $validated['teachers'] = is_string($teachers) ? explode(',', $teachers) : $teachers;
+        $validated['subjects'] = is_string($subjects) ? explode(',', $subjects) : $subjects;
+        $validated['groups'] = is_string($groups) ? explode(',', $groups) : $groups;
+        $validated['rooms'] = is_string($rooms) ? explode(',', $rooms) : $rooms;
+
+        return $this->generateResponse($validated);
+    }
+
+    public function generateResponse(array $validated): \Illuminate\Http\JsonResponse
+    {
         $query = DB::table('schedules')
             ->join('subjects', 'schedules.subjectId', '=', 'subjects.id')
             ->join('teachers', 'schedules.teacherId', '=', 'teachers.id')
