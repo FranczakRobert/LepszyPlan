@@ -5,10 +5,10 @@ import "./App.css";
 
 function sendRequestToAPI(filters, dateRange) {
     const requestBody = {
-        students: filters.students.length > 0 ? filters.studenci : null,
-        teachers: filters.teachers.length > 0 ? filters.wykladowcy : null,
-        subjects: filters.subjects.length > 0 ? filters.przedmioty : null,
-        rooms: filters.rooms.length > 0 ? filters.sale : null,
+        students: filters.students.length > 0 ? filters.students : null,
+        teachers: filters.teachers.length > 0 ? filters.teachers : null,
+        subjects: filters.subjects.length > 0 ? filters.subjects : null,
+        rooms: filters.rooms.length > 0 ? filters.rooms : null,
         from: dateRange.from || null,
         to: dateRange.to || null,
     };
@@ -132,7 +132,7 @@ function App() {
                     Pokaż plan
                 </button>
                 <PlanView viewType={viewType} setViewType={setViewType} planData={planData}/>
-                <Statistics viewStatistics={viewStatistics}/>
+                <Statistics viewStatistics={viewStatistics} dateRange={dateRange} planData={planData}/>
             </div>
 
             <footer className="footer">Strona stworzona przez projekt-syzyfy</footer>
@@ -200,8 +200,11 @@ function Filters({filters, setFilters, dateRange, setDateRange }) {
     const removeRoom = (room) => removeItemFromList("rooms", room);
     const handleSaveFilters = () => {
         try {
-            console.log("Filtry przed serializacją:", filters); // Dodaj logowanie
-            localStorage.setItem("ulubioneFiltry", JSON.stringify(filters));
+            const favoriteData = {
+                filters,
+                dateRange,
+            };
+            localStorage.setItem("ulubioneFiltry", JSON.stringify(favoriteData));
             alert("Filtry zapisane do ulubionych!");
             setIsFavorite(true);
         } catch (error) {
@@ -217,6 +220,18 @@ function Filters({filters, setFilters, dateRange, setDateRange }) {
             setIsFavorite(false);
         } else {
             alert("Brak zapisanych ulubionych filtrów do usunięcia.");
+        }
+    };
+
+    const loadFavoriteFilters = () => {
+        const favoriteFilters = localStorage.getItem("ulubioneFiltry");
+        if (favoriteFilters) {
+            const {filters, dateRange} = JSON.parse(favoriteFilters);
+            setFilters(filters);
+            setDateRange(dateRange);
+            alert("Ulubione filtry zostały wczytane!");
+        } else {
+            alert("Brak zapisanych ulubionych filtrów.");
         }
     };
 
@@ -369,6 +384,9 @@ function Filters({filters, setFilters, dateRange, setDateRange }) {
                 <div className="favorite-panel-icon">⭐</div>
                 <div className="favorite-panel-content">
                     <button onClick={handleSaveFilters}>Zapisz do ulubionych</button>
+                    {isFavorite && (
+                        <button onClick={loadFavoriteFilters}>Wpisz filtry z ulubionych</button>
+                    )}
                     {isFavorite && (
                         <button onClick={handleRemoveFilters}>Usuń z ulubionych</button>
                     )}
@@ -698,13 +716,28 @@ function PlanView({viewType, setViewType, planData}) {
     );
 }
 
-function Statistics({ viewStatistics }) {
+function Statistics({ viewStatistics,dateRange,planData }) {
+    function calculateDaysBetween(date1, date2) {
+        const firstDate = new Date(date1);
+        const secondDate = new Date(date2);
+
+        // Ustaw godziny na północ (00:00:00) dla obu dat
+        firstDate.setHours(0, 0, 0, 0);
+        secondDate.setHours(0, 0, 0, 0);
+
+        const timeDifference = Math.abs(secondDate - firstDate);
+        const daysDifference = Math.ceil(timeDifference / (1000 * 60 * 60 * 24));
+
+        return daysDifference;
+    }
+    const days = calculateDaysBetween(dateRange.from, dateRange.to);
+
     return (
         viewStatistics && (
             <div className="statistics">
                 <h1>Statystyki</h1>
-                <div>Całkowita liczba godzin: <span id="total-hours">0</span></div>
-                <div>Średnia liczba godzin na dzień: <span id="avg-hours">0</span></div>
+                <div>Całkowita liczba zajęć: <span id="total-hours">{ planData.length }</span></div>
+                <div>Średnia liczba zajęć na dzień: <span id="avg-hours">{ (planData.length / days).toFixed(2) }</span></div>
             </div>
         )
     );
