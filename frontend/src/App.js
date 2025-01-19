@@ -38,11 +38,11 @@ function App() {
     const [activeFilters, setActiveFilters] = useState({});
     const [viewType, setViewType] = useState("Dzienny");
     const [filters, setFilters] = useState({
-        studenci: [],
-        wykladowcy: [],
+        students: [],
+        teachers: [],
         kierunki: [],
-        przedmioty: [],
-        sale: [],
+        subjects: [],
+        rooms: [],
     });
     const [dateRange, setDateRange] = useState({
         from: "",
@@ -72,17 +72,14 @@ function App() {
 
         queryParams.forEach((value, key) => {
             if (key === "from" || key === "to") {
-                // Ustawienie wartości dla `dateRange`
-                newDateRange[key] = value || ""; // Jeśli wartość jest pusta, ustaw pusty string
+                newDateRange[key] = value || "";
             } else if (key.endsWith("[]")) {
-                // Obsługa tablic (np. studenci[])
-                const cleanKey = key.slice(0, -2); // Usunięcie "[]" z końca klucza
+                const cleanKey = key.slice(0, -2);
                 if (!newFilters[cleanKey]) {
                     newFilters[cleanKey] = [];
                 }
                 newFilters[cleanKey].push(value);
             } else {
-                // Obsługa pustych wartości jako null
                 newFilters[key] = value || null;
             }
         });
@@ -93,15 +90,11 @@ function App() {
         }));
 
         setDateRange(newDateRange);
-    console.log("Url params:", queryParams);
-        // Sprawdzenie, czy są jakieś filtry
         if (queryParams.toString()) {
             const apiUrl = `http://localhost:8000/generate-plan-url?${queryParams}`;
-            console.log("URL do zapytania:", apiUrl);
 
             try {
-                const response = await axios.get(apiUrl); // Wysłanie żądania GET
-                //console.log("Dane z backendu:", response.data); // Obsługa odpowiedzi
+                const response = await axios.get(apiUrl);
                 setPlanData(response.data);
             } catch (error) {
                 console.error("Błąd podczas pobierania danych:", error);
@@ -182,20 +175,20 @@ function Filters({filters, setFilters, dateRange, setDateRange }) {
 
     // Specjalistyczne funkcje dla każdej grupy
 
-    const addStudent = () => addItemToList("studenci", newStudent);
-    const removeStudent = (student) => removeItemFromList("studenci", student);
-    const addTeacher = () => addItemToList("wykladowcy", newTeacher);
-    const removeTeacher = (teacher) => removeItemFromList("wykladowcy", teacher);
+    const addStudent = () => addItemToList("students", newStudent);
+    const removeStudent = (student) => removeItemFromList("students", student);
+    const addTeacher = () => addItemToList("teachers", newTeacher);
+    const removeTeacher = (teacher) => removeItemFromList("teachers", teacher);
 
     const addDirection = () => addItemToList("kierunki", newDirection);
     const removeDirection = (direction) =>
         removeItemFromList("kierunki", direction);
 
-    const addSubject = () => addItemToList("przedmioty", newSubject);
-    const removeSubject = (subject) => removeItemFromList("przedmioty", subject);
+    const addSubject = () => addItemToList("subjects", newSubject);
+    const removeSubject = (subject) => removeItemFromList("subjects", subject);
 
-    const addRoom = () => addItemToList("sale", newRoom);
-    const removeRoom = (room) => removeItemFromList("sale", room);
+    const addRoom = () => addItemToList("rooms", newRoom);
+    const removeRoom = (room) => removeItemFromList("rooms", room);
     const handleSaveFilters = () => {
         try {
             console.log("Filtry przed serializacją:", filters); // Dodaj logowanie
@@ -252,7 +245,7 @@ function Filters({filters, setFilters, dateRange, setDateRange }) {
                 />
                 <button onClick={addStudent}>Dodaj</button>
                 <ul>
-                    {filters.studenci.map((student, index) => (
+                    {filters.students.map((student, index) => (
                         <li key={index}>
                             {student}{" "}
                             <button className="button-small" onClick={() => removeStudent(student)}><i
@@ -273,7 +266,7 @@ function Filters({filters, setFilters, dateRange, setDateRange }) {
                 />
                 <button onClick={addTeacher}>Dodaj</button>
                 <ul>
-                    {filters.wykladowcy.map((teacher, index) => (
+                    {filters.teachers.map((teacher, index) => (
                         <li key={index}>
                             {teacher}{" "}
                             <button className="button-small" onClick={() => removeTeacher(teacher)}><i
@@ -315,7 +308,7 @@ function Filters({filters, setFilters, dateRange, setDateRange }) {
                 />
                 <button onClick={addSubject}>Dodaj</button>
                 <ul>
-                    {filters.przedmioty.map((subject, index) => (
+                    {filters.subjects.map((subject, index) => (
                         <li key={index}>
                             {subject}{" "}
                             <button className="button-small" onClick={() => removeSubject(subject)}><i
@@ -336,7 +329,7 @@ function Filters({filters, setFilters, dateRange, setDateRange }) {
                 />
                 <button onClick={addRoom}>Dodaj</button>
                 <ul>
-                    {filters.sale.map((room, index) => (
+                    {filters.rooms.map((room, index) => (
                         <li key={index}>
                             {room}{" "}
                             <button className="button-small" onClick={() => removeRoom(room)}><i
@@ -394,6 +387,7 @@ function PlanView({ viewType, setViewType, planData }) {
             const startOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
             setCurrentDate(startOfMonth);
         }
+        setShowModal(false);
     }, [viewType]);
 
     const getStartOfWeek = (date) => {
@@ -499,7 +493,8 @@ function PlanView({ viewType, setViewType, planData }) {
                 {viewType === "Dzienny" && (
                     <div>
                         <h3>Plan dzienny</h3>
-                        {(planData || [])
+                        {
+                            (planData || [])
                             .filter(entry => new Date(entry.from).toDateString() === currentDate.toDateString())
                             .map((entry, index) => (
                                 <div key={index} className="plan">
@@ -632,7 +627,7 @@ function PlanView({ viewType, setViewType, planData }) {
                 )}
             </div>
 
-            {showModal && (
+            {(showModal && viewType === "Miesięczny") && (
                 <div className="modal">
                     <div className="modal-content">
                         <button onClick={closeModal} className="close-button">×</button>
