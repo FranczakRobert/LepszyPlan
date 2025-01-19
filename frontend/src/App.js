@@ -203,6 +203,16 @@ function Filters({filters, setFilters, dateRange, setDateRange }) {
         }
     };
 
+    const handleRemoveFilters = () => {
+        if (localStorage.getItem("ulubioneFiltry")) {
+            localStorage.removeItem("ulubioneFiltry");
+            alert("Ulubione filtry zostały usunięte.");
+        } else {
+            alert("Brak zapisanych ulubionych filtrów do usunięcia.");
+        }
+    };
+
+
     const handleCopyToClipboard = () => {
         // Tworzenie query stringa z filtrów
         const queryString = [
@@ -344,9 +354,27 @@ function Filters({filters, setFilters, dateRange, setDateRange }) {
 
 
             <div className="buttons">
-                <button onClick={handleSaveFilters}>Zapisz filtry do ulubionych</button>
                 <button onClick={handleCopyToClipboard}>Kopiuj do schowka</button>
             </div>
+
+            <div
+                className="favorite-panel"
+                title="Ulubione filtry"
+            >
+                <div className="favorite-panel-icon">⭐</div>
+                <div className="favorite-panel-content">
+                    <button onClick={handleSaveFilters}>Zapisz do ulubionych</button>
+                    {localStorage.getItem("ulubioneFiltry") && (
+                        <button onClick={() => {
+                            localStorage.removeItem("ulubioneFiltry");
+                            alert("Ulubione filtry zostały usunięte.");
+                        }}>
+                            Usuń z ulubionych
+                        </button>
+                    )}
+                </div>
+            </div>
+
 
             {/* Data od */}
             <div className="filter-group">
@@ -358,7 +386,7 @@ function Filters({filters, setFilters, dateRange, setDateRange }) {
                     onChange={(e) => handleDateChange("from", e.target.value)}
                 />
 
-            {/* Data do */}
+                {/* Data do */}
                 <label htmlFor="dateTo">Data do:</label>
                 <input
                     type="date"
@@ -373,7 +401,7 @@ function Filters({filters, setFilters, dateRange, setDateRange }) {
 
 }
 
-function PlanView({ viewType, setViewType, planData }) {
+function PlanView({viewType, setViewType, planData}) {
     const [currentDate, setCurrentDate] = useState(new Date());
     const [showModal, setShowModal] = useState(false); // Stan dla widoczności modala
     const [selectedDayData, setSelectedDayData] = useState([]); // Stan dla danych wybranego dnia
