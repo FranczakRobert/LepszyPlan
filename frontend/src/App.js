@@ -5,10 +5,10 @@ import "./App.css";
 
 function sendRequestToAPI(filters, dateRange) {
     const requestBody = {
-        students: filters.studenci.length > 0 ? filters.studenci : null,
-        teachers: filters.wykladowcy.length > 0 ? filters.wykladowcy : null,
-        subjects: filters.przedmioty.length > 0 ? filters.przedmioty : null,
-        rooms: filters.sale.length > 0 ? filters.sale : null,
+        students: filters.students.length > 0 ? filters.studenci : null,
+        teachers: filters.teachers.length > 0 ? filters.wykladowcy : null,
+        subjects: filters.subjects.length > 0 ? filters.przedmioty : null,
+        rooms: filters.rooms.length > 0 ? filters.sale : null,
         from: dateRange.from || null,
         to: dateRange.to || null,
     };
@@ -37,6 +37,7 @@ function sendRequestToAPI(filters, dateRange) {
 function App() {
     const [activeFilters, setActiveFilters] = useState({});
     const [viewType, setViewType] = useState("Dzienny");
+    const [viewStatistics, setViewStatistics] = useState(false);
     const [filters, setFilters] = useState({
         students: [],
         teachers: [],
@@ -59,6 +60,7 @@ function App() {
 
         sendRequestToAPI(filters, dateRange).then((data) => {
                 setPlanData(data); // Set the plan data state
+                setViewStatistics(true);
             })
             .catch((error) => {
                 console.error("Error fetching data:", error);
@@ -96,6 +98,7 @@ function App() {
             try {
                 const response = await axios.get(apiUrl);
                 setPlanData(response.data);
+                setViewStatistics(true);
             } catch (error) {
                 console.error("Błąd podczas pobierania danych:", error);
             }
@@ -129,7 +132,7 @@ function App() {
                     Pokaż plan
                 </button>
                 <PlanView viewType={viewType} setViewType={setViewType} planData={planData}/>
-                <Statistics />
+                <Statistics viewStatistics={viewStatistics}/>
             </div>
 
             <footer className="footer">Strona stworzona przez projekt-syzyfy</footer>
@@ -667,13 +670,17 @@ function PlanView({ viewType, setViewType, planData }) {
     );
 }
 
-function Statistics() {
+function Statistics({ viewStatistics }) {
     return (
-        <div className="statistics">
-            <div>Całkowita liczba godzin: <span id="total-hours">0</span></div>
-            <div>Średnia liczba godzin na dzień: <span id="avg-hours">0</span></div>
-        </div>
+        viewStatistics && (
+            <div className="statistics">
+                <h1>Statystyki</h1>
+                <div>Całkowita liczba godzin: <span id="total-hours">0</span></div>
+                <div>Średnia liczba godzin na dzień: <span id="avg-hours">0</span></div>
+            </div>
+        )
     );
 }
+
 
 export default App;
