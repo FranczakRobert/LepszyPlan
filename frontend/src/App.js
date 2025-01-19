@@ -148,6 +148,12 @@ function Filters({filters, setFilters, dateRange, setDateRange }) {
     const [newDirection, setNewDirection] = useState("");
     const [newSubject, setNewSubject] = useState("");
     const [newRoom, setNewRoom] = useState("");
+    const [isFavorite, setIsFavorite] = useState(false);
+
+    useEffect(() => {
+        const savedFilters = localStorage.getItem("ulubioneFiltry");
+        setIsFavorite(!!savedFilters);
+    })
 
     const handleDateChange = (key, value) => {
         setDateRange((prevRange) => ({
@@ -197,6 +203,7 @@ function Filters({filters, setFilters, dateRange, setDateRange }) {
             console.log("Filtry przed serializacją:", filters); // Dodaj logowanie
             localStorage.setItem("ulubioneFiltry", JSON.stringify(filters));
             alert("Filtry zapisane do ulubionych!");
+            setIsFavorite(true);
         } catch (error) {
             console.error("Błąd podczas zapisywania filtrów:", error);
             alert("Wystąpił błąd podczas zapisywania filtrów.");
@@ -207,6 +214,7 @@ function Filters({filters, setFilters, dateRange, setDateRange }) {
         if (localStorage.getItem("ulubioneFiltry")) {
             localStorage.removeItem("ulubioneFiltry");
             alert("Ulubione filtry zostały usunięte.");
+            setIsFavorite(false);
         } else {
             alert("Brak zapisanych ulubionych filtrów do usunięcia.");
         }
@@ -357,20 +365,12 @@ function Filters({filters, setFilters, dateRange, setDateRange }) {
                 <button onClick={handleCopyToClipboard}>Kopiuj do schowka</button>
             </div>
 
-            <div
-                className="favorite-panel"
-                title="Ulubione filtry"
-            >
+            <div className="favorite-panel" title="Ulubione filtry">
                 <div className="favorite-panel-icon">⭐</div>
                 <div className="favorite-panel-content">
                     <button onClick={handleSaveFilters}>Zapisz do ulubionych</button>
-                    {localStorage.getItem("ulubioneFiltry") && (
-                        <button onClick={() => {
-                            localStorage.removeItem("ulubioneFiltry");
-                            alert("Ulubione filtry zostały usunięte.");
-                        }}>
-                            Usuń z ulubionych
-                        </button>
+                    {isFavorite && (
+                        <button onClick={handleRemoveFilters}>Usuń z ulubionych</button>
                     )}
                 </div>
             </div>
